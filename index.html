@@ -4,13 +4,14 @@
     <meta charset="UTF-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <title>ICQ-чат</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/webtorrent@latest/webtorrent.min.js"></script>
     <style>
-        /* ===== БАЗОВЫЕ СТИЛИ ===== */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         html, body {
             width: 100%;
@@ -77,7 +78,6 @@
             position: relative;
         }
 
-        /* ===== ПАНЕЛЬ КОНТАКТОВ ===== */
         .contact-panel {
             width: 280px;
             background: var(--bg-panel);
@@ -326,7 +326,6 @@
         }
         .contact-item .remove-contact:hover { color: var(--danger); }
 
-        /* ===== ПАНЕЛЬ ЧАТА ===== */
         .chat-panel {
             flex: 1;
             display: flex;
@@ -492,46 +491,39 @@
             word-wrap: break-word;
             overflow-wrap: break-word;
         }
-        .message-row .bubble .file-link {
-            display: inline-block;
-            padding: 4px 12px;
-            background: rgba(10,132,255,0.2);
-            border-radius: 12px;
-            color: var(--accent);
-            text-decoration: none;
-            font-weight: 500;
-            border: 1px solid rgba(10,132,255,0.4);
-            cursor: pointer;
-        }
-        .message-row.mine .bubble .file-link {
-            background: rgba(255,255,255,0.2);
-            color: #fff;
-            border-color: rgba(255,255,255,0.4);
-        }
         
-        /* ===== СТАТУСЫ СООБЩЕНИЙ ===== */
+        /* ===== СТАТУСЫ СООБЩЕНИЙ (ГАЛОЧКИ) ===== */
         .message-status {
             display: inline-flex;
             align-items: center;
-            gap: 2px;
-            margin-left: 6px;
-            font-size: 12px;
+            gap: 1px;
+            margin-left: 4px;
+            font-size: 14px;
+            letter-spacing: -2px;
         }
-        .message-status .status-icon {
+        .message-status .check {
             display: inline-block;
-            font-size: 12px;
+            font-size: 14px;
             line-height: 1;
-        }
-        .message-status .status-icon.sent { color: var(--text-muted); }
-        .message-status .status-icon.delivered { color: var(--success); }
-        .message-status .status-icon.read { color: var(--accent); }
-        .message-status .status-icon.sending { 
             color: var(--text-muted);
-            animation: spin 1s linear infinite;
+            opacity: 0.6;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .message-status .check.delivered {
+            color: var(--success);
+            opacity: 1;
+        }
+        .message-status .check.read {
+            color: var(--accent);
+            opacity: 1;
+        }
+        .message-status .check.sending {
+            color: var(--text-muted);
+            opacity: 0.4;
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 1; }
         }
         
         .message-row.mine .bubble .time-status-wrap {
@@ -553,6 +545,27 @@
             color: var(--text-muted);
         }
         .message-row.mine .bubble .time { color: rgba(255,255,255,0.6); }
+        
+        /* ===== TORRENT ===== */
+        .magnet-link {
+            color: var(--accent);
+            text-decoration: underline;
+            cursor: pointer;
+            font-weight: 500;
+            display: inline-block;
+            padding: 4px 0;
+        }
+        .message-row.mine .magnet-link { color: #fff; }
+        .torrent-info {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+        .torrent-progress {
+            font-size: 12px;
+            color: var(--success);
+            margin-top: 4px;
+        }
 
         .input-area {
             padding: 10px 14px;
@@ -721,7 +734,6 @@
         .status-bar.error { color: var(--danger); }
         .status-bar.warning { color: #ffd60a; }
 
-        /* ===== КОНТЕКСТНОЕ МЕНЮ ===== */
         .context-menu {
             display: none;
             position: fixed;
@@ -776,7 +788,6 @@
             color: var(--text-muted);
         }
 
-        /* ===== МОДАЛЬНОЕ ОКНО НАСТРОЕК ===== */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -860,7 +871,6 @@
             transform: translateX(20px);
         }
 
-        /* ===== BOTTOM SHEET (мобильное меню) ===== */
         .bottom-sheet {
             display: none;
             position: fixed;
@@ -1104,8 +1114,10 @@
             <button class="emoji-btn" id="emojiBtn">😊</button>
             <div class="emoji-panel" id="emojiPanel"></div>
             <input type="text" class="message-input" id="messageInput" placeholder="Написать сообщение..." disabled>
+            <button class="file-btn" id="fileBtn" title="Отправить файл через торрент">📎</button>
             <button class="send-btn" id="sendBtn" disabled>Отправить</button>
         </div>
+        <input type="file" id="fileInput" accept="*/*">
     </div>
 </div>
 
@@ -1142,11 +1154,30 @@ const usersRef = db.ref('users');
 const typingRef = db.ref('typing');
 
 // ============================================================
+// WEBTORRENT
+// ============================================================
+let webtorrentClient = null;
+let activeTorrents = {};
+
+function initWebTorrent() {
+    if (webtorrentClient) return webtorrentClient;
+    try {
+        webtorrentClient = new WebTorrent();
+        console.log('✅ WebTorrent инициализирован');
+    } catch(e) {
+        console.warn('⚠️ WebTorrent init error:', e);
+    }
+    return webtorrentClient;
+}
+
+// ============================================================
 // DOM
 // ============================================================
 const messagesDiv = document.getElementById('messagesContainer');
 const input = document.getElementById('messageInput');
 const sendBtn = document.getElementById('sendBtn');
+const fileBtn = document.getElementById('fileBtn');
+const fileInput = document.getElementById('fileInput');
 const statusDiv = document.getElementById('status');
 const myAvatar = document.getElementById('myAvatar');
 const headerUsername = document.getElementById('headerUsername');
@@ -1203,7 +1234,7 @@ let isAtBottom = true;
 let messageListenerStarted = false;
 let notificationsEnabled = true;
 let currentTheme = 'dark';
-let pendingMessages = {}; // { key: true } для временных сообщений
+let messageStatuses = {}; // { key: 'sending'|'sent'|'delivered'|'read' }
 
 // ============================================================
 // ТЕМА
@@ -1223,7 +1254,6 @@ function toggleTheme() {
     localStorage.setItem('chatTheme', currentTheme);
 }
 
-// Меню настроек
 settingsBtn.addEventListener('click', () => {
     const overlay = document.createElement('div');
     overlay.className = 'modal-overlay active';
@@ -1271,7 +1301,6 @@ settingsBtn.addEventListener('click', () => {
     modal.querySelector('.close-btn').addEventListener('click', () => overlay.remove());
     overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
     
-    // Тема
     const themeToggle = modal.querySelector('#themeToggle');
     themeToggle.addEventListener('click', () => {
         toggleTheme();
@@ -1280,7 +1309,6 @@ settingsBtn.addEventListener('click', () => {
         slider.style.transform = currentTheme === 'dark' ? 'translateX(20px)' : 'translateX(0)';
     });
     
-    // Уведомления
     const notifyToggle = modal.querySelector('#notifyToggle');
     notifyToggle.addEventListener('click', () => {
         notificationsEnabled = !notificationsEnabled;
@@ -1290,7 +1318,6 @@ settingsBtn.addEventListener('click', () => {
         slider.style.transform = notificationsEnabled ? 'translateX(20px)' : 'translateX(0)';
     });
     
-    // Смена имени
     modal.querySelector('#changeNameBtn').addEventListener('click', () => {
         const newName = prompt('Введите новое имя:', currentName);
         if (newName && newName.trim()) {
@@ -1612,48 +1639,208 @@ function switchContact(id) {
 }
 
 // ============================================================
-// СТАТУСЫ СООБЩЕНИЙ
+// СТАТУСЫ СООБЩЕНИЙ (ГАЛОЧКИ)
 // ============================================================
-function getStatusIcon(status) {
+function getStatusHTML(status) {
+    // status: 'sending' | 'sent' | 'delivered' | 'read'
     switch(status) {
         case 'sending':
-            return '<span class="status-icon sending">⏳</span>';
+            return '<span class="check sending">✓</span>';
         case 'sent':
-            return '<span class="status-icon sent">✓</span>';
+            return '<span class="check">✓</span><span class="check">✓</span>';
         case 'delivered':
-            return '<span class="status-icon delivered">✓✓</span>';
+            return '<span class="check delivered">✓</span><span class="check delivered">✓</span>';
         case 'read':
-            return '<span class="status-icon read">✓✓✓</span>';
+            return '<span class="check read">✓</span><span class="check read">✓</span>';
         default:
             return '';
     }
 }
 
 function updateMessageStatus(key, status) {
+    messageStatuses[key] = status;
     const node = messageNodes[key];
     if (!node) return;
     const statusEl = node.querySelector('.message-status');
     if (statusEl) {
-        statusEl.innerHTML = getStatusIcon(status);
+        statusEl.innerHTML = getStatusHTML(status);
     }
     // Обновляем в кэше
     const msg = messagesCache.find(m => m.key === key);
     if (msg) msg.status = status;
 }
 
+function markAsDelivered(key) {
+    const msg = messagesCache.find(m => m.key === key);
+    if (!msg) return;
+    if (msg.name === currentName) {
+        if (msg.status !== 'delivered' && msg.status !== 'read') {
+            messagesRef.child(key).update({ status: 'delivered' });
+        }
+    }
+}
+
 function markAsRead(key) {
     const msg = messagesCache.find(m => m.key === key);
     if (!msg) return;
     if (msg.name === currentName) {
-        // Это наше сообщение, обновляем статус
         if (msg.status !== 'read') {
             messagesRef.child(key).update({ status: 'read' });
         }
     } else {
-        // Это сообщение от другого пользователя, обновляем его статус
+        // Чужое сообщение — помечаем как прочитанное
         messagesRef.child(key).update({ status: 'read' });
     }
 }
+
+// ============================================================
+// TORRENT
+// ============================================================
+function shareFileViaTorrent(file) {
+    if (!currentUser) {
+        alert('Войдите в систему');
+        return;
+    }
+    
+    const to = recipientInput.value.trim() || null;
+    
+    if (!webtorrentClient) webtorrentClient = initWebTorrent();
+    if (!webtorrentClient) {
+        alert('Не удалось инициализировать WebTorrent');
+        return;
+    }
+    
+    addSystemMessage('📤 Начинаем раздачу файла "' + file.name + '" через торрент...');
+    fileBtn.style.opacity = '0.5';
+    fileBtn.disabled = true;
+    
+    try {
+        webtorrentClient.seed(file, (torrent) => {
+            const magnetURI = torrent.magnetURI;
+            
+            // Отправляем Magnet-ссылку в чат
+            const payload = {
+                name: currentName,
+                text: magnetURI,
+                torrentName: file.name,
+                torrentSize: file.size,
+                isTorrent: true,
+                to: to,
+                timestamp: firebase.database.ServerValue.TIMESTAMP,
+                status: 'sending'
+            };
+            
+            messagesRef.push(payload);
+            
+            addSystemMessage('📤 Файл "' + file.name + '" начал раздаваться. Magnet-ссылка отправлена в чат!');
+            fileBtn.style.opacity = '1';
+            fileBtn.disabled = false;
+            
+            // Показываем Magnet-ссылку
+            if (confirm('Файл начал раздаваться. Скопировать Magnet-ссылку в буфер обмена?')) {
+                navigator.clipboard.writeText(magnetURI).catch(() => {});
+            }
+        });
+    } catch(err) {
+        console.error('Torrent error:', err);
+        addSystemMessage('❌ Ошибка создания торрента: ' + err.message);
+        fileBtn.style.opacity = '1';
+        fileBtn.disabled = false;
+    }
+}
+
+function downloadViaWebTorrent(magnetURI, fileName) {
+    if (!webtorrentClient) webtorrentClient = initWebTorrent();
+    if (!webtorrentClient) {
+        addSystemMessage('❌ Не удалось инициализировать WebTorrent');
+        return;
+    }
+    
+    if (activeTorrents[magnetURI]) {
+        alert('Этот файл уже скачивается!');
+        return;
+    }
+    
+    addSystemMessage('📥 Начинаем загрузку "' + fileName + '" через торрент...');
+    
+    try {
+        webtorrentClient.add(magnetURI, (torrent) => {
+            activeTorrents[magnetURI] = torrent;
+            
+            const file = torrent.files[0];
+            addSystemMessage('📥 Файл "' + file.name + '" начал загружаться. Размер: ' + (file.length / 1024 / 1024).toFixed(2) + ' MB');
+            
+            // Прогресс
+            let lastProgress = 0;
+            torrent.on('download', () => {
+                const progress = (torrent.progress * 100);
+                if (progress - lastProgress > 5) {
+                    lastProgress = progress;
+                    // Можно обновить UI
+                }
+            });
+            
+            file.getBlob((err, blob) => {
+                if (err) {
+                    addSystemMessage('❌ Ошибка загрузки файла: ' + err.message);
+                    delete activeTorrents[magnetURI];
+                    return;
+                }
+                
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = file.name;
+                a.click();
+                URL.revokeObjectURL(url);
+                
+                addSystemMessage('✅ Файл "' + file.name + '" успешно скачан!');
+                
+                torrent.destroy();
+                delete activeTorrents[magnetURI];
+            });
+        });
+    } catch(err) {
+        console.error('Download error:', err);
+        addSystemMessage('❌ Ошибка загрузки: ' + err.message);
+    }
+}
+
+function addSystemMessage(text) {
+    const div = document.createElement('div');
+    div.className = 'message-row system';
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    bubble.textContent = text;
+    div.appendChild(bubble);
+    messagesDiv.appendChild(div);
+    if (isAtBottom) messagesDiv.scrollTop = messagesDiv.scrollHeight;
+}
+
+// ============================================================
+// ФАЙЛЫ (через торрент)
+// ============================================================
+fileBtn.addEventListener('click', () => {
+    if (!currentUser) {
+        alert('Войдите в систему');
+        return;
+    }
+    fileInput.click();
+});
+
+fileInput.onchange = (e) => {
+    if (e.target.files.length) {
+        const file = e.target.files[0];
+        // Проверяем размер (максимум 1GB для WebTorrent)
+        if (file.size > 1024 * 1024 * 1024) {
+            alert('Файл слишком большой (максимум 1GB)');
+            fileInput.value = '';
+            return;
+        }
+        shareFileViaTorrent(file);
+        fileInput.value = '';
+    }
+};
 
 // ============================================================
 // СООБЩЕНИЯ
@@ -1666,6 +1853,7 @@ function listenMessages() {
     messagesDiv.innerHTML = '';
     messageNodes = {};
     messagesCache = [];
+    messageStatuses = {};
     
     messagesRef.limitToLast(100).once('value', (snapshot) => {
         const items = [];
@@ -1676,7 +1864,7 @@ function listenMessages() {
         items.forEach(item => addMessageToUI(item.key, item));
         messagesDiv.scrollTop = messagesDiv.scrollHeight;
         isAtBottom = true;
-        // Помечаем все непрочитанные как прочитанные
+        // Помечаем все как прочитанные
         markAllAsRead();
     });
 
@@ -1689,11 +1877,8 @@ function listenMessages() {
             newMessagesCountVal++;
             updateNewMessagesBtn();
         }
-        // Если сообщение от другого пользователя и чат активен - помечаем как прочитанное
         if (data.name !== currentName && (data.to === currentName || !data.to)) {
             markAsRead(key);
-        }
-        if (data.name !== currentName && (data.to === currentName || !data.to)) {
             playNotification();
             if (document.hidden || document.visibilityState === 'hidden') {
                 unreadTotal++;
@@ -1702,6 +1887,7 @@ function listenMessages() {
             if (notificationsEnabled) {
                 const title = '📩 ' + (data.name || 'Аноним');
                 let body = data.text || '';
+                if (data.isTorrent) body = '📎 Торрент файл';
                 if (!body) body = 'Новое сообщение';
                 showNotification(title, body);
             }
@@ -1713,18 +1899,17 @@ function listenMessages() {
         const key = snapshot.key;
         const existing = messagesCache.find(m => m.key === key);
         if (existing) {
-            const wasEdited = existing.text !== data.text && data.text;
+            const oldStatus = existing.status;
             Object.assign(existing, data);
-            if (wasEdited) existing.edited = true;
             const node = messageNodes[key];
             if (node) {
                 const newRow = createMessageRow(key, data);
                 node.parentNode.replaceChild(newRow, node);
                 messageNodes[key] = newRow;
             }
-            // Если статус изменился на read и это наше сообщение - обновляем иконку
-            if (data.status === 'read' && existing.name === currentName) {
-                updateMessageStatus(key, 'read');
+            // Обновляем статус, если изменился
+            if (data.status && data.status !== oldStatus) {
+                updateMessageStatus(key, data.status);
             }
         }
     });
@@ -1773,7 +1958,7 @@ function addMessageToUI(key, data) {
                     }
                 }
                 if (!contacts[contactId]) contacts[contactId] = {};
-                contacts[contactId].lastMsg = data.text || '';
+                contacts[contactId].lastMsg = data.text || (data.isTorrent ? '📎 Торрент' : '');
                 contacts[contactId].timestamp = data.timestamp || 0;
                 renderContacts();
             }
@@ -1781,24 +1966,20 @@ function addMessageToUI(key, data) {
         return;
     }
     
-    // Если сообщение от нас и нет статуса - добавляем
-    if (data.name === currentName && !data.status) {
-        data.status = 'sent';
-        // Обновляем в Firebase
-        messagesRef.child(key).update({ status: 'sent' });
-    }
-    
+    if (!data.status) data.status = 'sending';
     messagesCache.push({ key, ...data });
+    messageStatuses[key] = data.status;
     const row = createMessageRow(key, data);
     messagesDiv.appendChild(row);
     messageNodes[key] = row;
     if (isAtBottom) messagesDiv.scrollTop = messagesDiv.scrollHeight;
     updateContactsFromCache();
     
-    // Если это наше сообщение и оно только что добавлено - меняем статус на sent
+    // Если наше сообщение и статус sending - обновляем на sent
     if (data.name === currentName && data.status === 'sending') {
         setTimeout(() => {
             updateMessageStatus(key, 'sent');
+            messagesRef.child(key).update({ status: 'sent' });
         }, 500);
     }
 }
@@ -1832,7 +2013,46 @@ function createMessageRow(key, data) {
     const textDiv = document.createElement('div');
     textDiv.className = 'text';
     
-    if (data.text) {
+    // Проверяем, является ли сообщение торрентом
+    if (data.isTorrent && data.text && data.text.startsWith('magnet:?')) {
+        // Ссылка на торрент
+        const link = document.createElement('span');
+        link.className = 'magnet-link';
+        link.textContent = '📥 Скачать "' + (data.torrentName || 'файл') + '" через торрент';
+        link.onclick = () => {
+            downloadViaWebTorrent(data.text, data.torrentName || 'файл');
+        };
+        textDiv.appendChild(link);
+        
+        // Информация о файле
+        if (data.torrentSize) {
+            const info = document.createElement('div');
+            info.className = 'torrent-info';
+            info.textContent = 'Размер: ' + (data.torrentSize / 1024 / 1024).toFixed(2) + ' MB';
+            textDiv.appendChild(info);
+        }
+        
+        // Кнопка копирования
+        const copyBtn = document.createElement('button');
+        copyBtn.textContent = '📋 Копировать Magnet-ссылку';
+        copyBtn.style.cssText = 'display:block;margin-top:4px;background:var(--accent);color:white;border:none;border-radius:12px;padding:2px 10px;font-size:12px;cursor:pointer;';
+        copyBtn.onclick = (e) => {
+            e.stopPropagation();
+            navigator.clipboard?.writeText(data.text).then(() => {
+                alert('Magnet-ссылка скопирована!');
+            }).catch(() => {
+                const textarea = document.createElement('textarea');
+                textarea.value = data.text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                alert('Magnet-ссылка скопирована!');
+            });
+        };
+        textDiv.appendChild(copyBtn);
+    } else if (data.text) {
+        // Обычный текст
         const lines = data.text.split('\n');
         lines.forEach((line, i) => {
             if (i > 0) textDiv.appendChild(document.createElement('br'));
@@ -1859,7 +2079,7 @@ function createMessageRow(key, data) {
         const statusSpan = document.createElement('span');
         statusSpan.className = 'message-status';
         const status = data.status || 'sent';
-        statusSpan.innerHTML = getStatusIcon(status);
+        statusSpan.innerHTML = getStatusHTML(status);
         timeStatusWrap.appendChild(statusSpan);
     }
     
@@ -1898,7 +2118,7 @@ function createMessageRow(key, data) {
 let longPressTimer = null;
 
 // ============================================================
-// КОНТЕКСТНОЕ МЕНЮ (с реакциями)
+// КОНТЕКСТНОЕ МЕНЮ
 // ============================================================
 function showContextMenu(e, key, data) {
     e.preventDefault();
@@ -2073,7 +2293,7 @@ function handleContextAction(action, key) {
 }
 
 // ============================================================
-// BOTTOM SHEET (мобильное контекстное меню)
+// BOTTOM SHEET
 // ============================================================
 function showBottomSheet(key, data) {
     contextTarget = key;
@@ -2090,7 +2310,6 @@ function showBottomSheet(key, data) {
         actions.push({ action: 'delete', label: '🗑 Удалить' });
     }
     
-    // Реакции
     const reactionEmojis = ['❤️', '😂', '😮', '😢', '🔥'];
     const reactionRow = document.createElement('div');
     reactionRow.style.cssText = 'display:flex;gap:8px;padding:8px 0;border-bottom:1px solid var(--border-color);';
@@ -2141,14 +2360,14 @@ function updateContactsFromCache() {
         const contactId = item.to && item.to !== currentName ? item.to : (item.name !== currentName ? item.name : null);
         if (contactId) {
             if (!newContacts[contactId]) newContacts[contactId] = { lastMsg: '', time: '', timestamp: 0 };
-            newContacts[contactId].lastMsg = item.text || '';
+            newContacts[contactId].lastMsg = item.text || (item.isTorrent ? '📎 Торрент' : '');
             const ts = item.timestamp || 0;
             newContacts[contactId].time = ts ? new Date(ts).toLocaleTimeString() : '';
             newContacts[contactId].timestamp = ts;
         }
         if (!item.to) {
             if (!newContacts['all']) newContacts['all'] = { lastMsg: '', time: '', timestamp: 0 };
-            newContacts['all'].lastMsg = item.text || '';
+            newContacts['all'].lastMsg = item.text || (item.isTorrent ? '📎 Торрент' : '');
             const ts = item.timestamp || 0;
             newContacts['all'].time = ts ? new Date(ts).toLocaleTimeString() : '';
             newContacts['all'].timestamp = ts;
@@ -2178,16 +2397,12 @@ function updateContactsFromCache() {
 }
 
 // ============================================================
-// ОТПРАВКА С СОСТОЯНИЯМИ
+// ОТПРАВКА СООБЩЕНИЙ
 // ============================================================
 function sendMessage(text) {
     if (!currentUser || !currentName) return;
     const to = recipientInput.value.trim() || null;
     
-    // Создаём временный ID
-    const tempKey = 'temp_' + Date.now() + '_' + Math.random().toString(36).substr(2, 6);
-    
-    // Создаём объект сообщения
     const payload = {
         name: currentName,
         text: text || '',
@@ -2196,50 +2411,12 @@ function sendMessage(text) {
         status: 'sending'
     };
     
-    // Добавляем в UI сразу (оптимистичное обновление)
-    const tempData = { ...payload, key: tempKey };
-    messagesCache.push(tempData);
-    const row = createMessageRow(tempKey, tempData);
-    messagesDiv.appendChild(row);
-    messageNodes[tempKey] = row;
-    if (isAtBottom) messagesDiv.scrollTop = messagesDiv.scrollHeight;
-    
-    // Отправляем в Firebase
-    const newRef = messagesRef.push(payload);
-    const realKey = newRef.key;
-    
-    // Обновляем статус на sent
-    newRef.then(() => {
-        // Удаляем временное сообщение
-        const tempNode = messageNodes[tempKey];
-        if (tempNode) {
-            tempNode.remove();
-            delete messageNodes[tempKey];
-        }
-        // Обновляем реальный ключ
-        const msgIndex = messagesCache.findIndex(m => m.key === tempKey);
-        if (msgIndex !== -1) {
-            messagesCache.splice(msgIndex, 1);
-        }
-        // Добавляем реальное сообщение
-        messagesRef.child(realKey).once('value', (snap) => {
-            const data = snap.val();
-            if (data) {
-                data.status = 'sent';
-                messagesRef.child(realKey).update({ status: 'sent' });
-                addMessageToUI(realKey, data);
-            }
-        });
-    });
-    
+    messagesRef.push(payload);
     clearTypingStatus();
     if (to) chatHeaderName.textContent = to;
     else chatHeaderName.textContent = 'Общий чат';
 }
 
-// ============================================================
-// ОТПРАВКА ТЕКСТА
-// ============================================================
 function sendText() {
     const text = input.value.trim();
     if (!text) return;
@@ -2266,7 +2443,6 @@ input.onkeydown = (e) => {
 // ПОМЕТКА ВСЕХ КАК ПРОЧИТАННЫХ
 // ============================================================
 function markAllAsRead() {
-    // Помечаем все сообщения в текущем чате как прочитанные
     messagesCache.forEach(msg => {
         if (msg.name !== currentName && (msg.to === currentName || !msg.to)) {
             if (msg.status !== 'read') {
@@ -2352,7 +2528,6 @@ newMessagesBtn.addEventListener('click', () => {
     newMessagesCountVal = 0;
     updateNewMessagesBtn();
     isAtBottom = true;
-    // Помечаем как прочитанные при скролле вниз
     markAllAsRead();
 });
 
@@ -2462,6 +2637,8 @@ auth.onAuthStateChanged(user => {
             updateUnreadBadge(0);
             messageListenerStarted = false;
             listenMessages();
+            // Инициализируем WebTorrent
+            setTimeout(initWebTorrent, 1000);
         });
     } else {
         currentUser = null;
@@ -2602,7 +2779,7 @@ myAvatar.addEventListener('dblclick', () => {
 // ============================================================
 // ЗАПУСК
 // ============================================================
-console.log('🚀 ICQ-чат загружен! С поддержкой статусов сообщений');
+console.log('🚀 ICQ-чат загружен! Торрент + статусы сообщений');
 console.log('📱 Добавьте страницу на рабочий стол через браузер');
 </script>
 </body>
