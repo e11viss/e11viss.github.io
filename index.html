@@ -440,11 +440,6 @@
             justify-content: center;
             padding: 0 5px;
         }
-        .chat-item .group-member-count {
-            font-size: 11px;
-            color: var(--text-muted);
-            margin-left: 4px;
-        }
 
         /* ===== CHAT PANEL ===== */
         .chat-panel {
@@ -1357,22 +1352,6 @@
             padding: 0 8px;
             border-radius: 4px;
         }
-        .modal .group-member-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 8px 0;
-            border-bottom: 1px solid var(--border-color);
-        }
-        .modal .group-member-item .remove-member {
-            margin-left: auto;
-            background: none;
-            border: none;
-            color: var(--danger);
-            cursor: pointer;
-            font-size: 16px;
-            padding: 4px 8px;
-        }
 
         /* ===== CALL ===== */
         .call-overlay {
@@ -1464,14 +1443,6 @@
             background: #000;
             margin: 12px 0;
             object-fit: cover;
-        }
-        .call-container .video-row {
-            display: flex;
-            gap: 12px;
-        }
-        .call-container .video-row video {
-            width: 50%;
-            max-height: 200px;
         }
 
         /* ===== RESPONSIVE ===== */
@@ -3810,151 +3781,119 @@ chatBackBtn.addEventListener('click', () => {
 chatListOverlay.addEventListener('click', closeChatList);
 
 // ============================================================
-// АУТЕНТИФИКАЦИЯ
-// ============================================================
-auth.onAuthStateChanged(user => {
-    if (user) {
-        currentUser = user;
-        usersRef.child(user.uid).once('value').then(snap => {
-            const data = snap.val() || {};
-            let name = data.name;
-            let userId = data.userId;
-            if (!userId) {
-                userId = generateUserId();
-                usersRef.child(user.uid).update({ userId });
-            }
-            if (!name || name.startsWith('Гость')) {
-                if (user.email) name = user.email.split('@')[0];
-                else name = 'Гость' + Math.floor(Math.random() * 10000);
-                usersRef.child(user.uid).update({ name });
-            }
-            currentName = name;
-            currentUserId = userId;
-            headerUsername.textContent = currentName;
-            updateHeaderAvatar();
-            messageInput.disabled = false;
-            sendBtn.disabled = false;
-            statusDiv.textContent = '✅ Подключено';
-            statusDiv.className = 'status-bar';
-            loadContacts();
-            loadGroups();
-            switchContact('all');
-            setupOnlineStatus();
-            onlineRef.on('value', () => updateOnlineDots());
-            usersRef.once('value', (snapshot) => {
-                const data = snapshot.val() || {};
-                Object.keys(data).forEach(uid => {
-                    const u = data[uid];
-                    if (u.name && u.avatar) setAvatarCache(u.name, u.avatar);
-                });
-                renderChatList();
-            });
-            if ("Notification" in window && Notification.permission === "default") {
-                Notification.requestPermission();
-            }
-            // Инициализация PeerJS для звонков
-            initPeer();
-        });
-    } else {
-        if (onlineInterval) { clearInterval(onlineInterval); onlineInterval = null; }
-        if (currentUserId) onlineRef.child(sanitizeKey(currentUserId)).remove();
-        currentUser = null;
-        currentName = '';
-        currentUserId = '';
-        headerUsername.textContent = '—';
-        myAvatar.style.backgroundImage = '';
-        myAvatar.textContent = '?';
-        messageInput.disabled = true;
-        sendBtn.disabled = true;
-        statusDiv.textContent = '⏳ Войдите или зарегистрируйтесь';
-        messagesDiv.innerHTML = '';
-        chatList.innerHTML = '';
-        messagesRef.off();
-        messageListenerStarted = false;
-        contacts = {};
-        contactListArray = [];
-        unreadCounts = {};
-        unreadTotal = 0;
-        stopBlinking();
-        clearTypingListeners();
-        typingIndicator.style.display = 'none';
-        smartReplies.classList.remove('active');
-        showLoginModal();
-    }
-});
-
-function showLoginModal() {
-    showModal(`
-        <div class="modal-header">
-            <h2>🔐 Вход</h2>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:12px;">
-            <input type="email" id="loginEmail" placeholder="Email" class="input-field">
-            <input type="password" id="loginPassword" placeholder="Пароль" class="input-field">
-            <button id="loginSubmitBtn" style="background:var(--accent);color:#fff;border:none;border-radius:12px;padding:12px;font-size:16px;font-weight:600;cursor:pointer;min-height:44px;">Войти</button>
-            <button id="registerSubmitBtn" style="background:var(--bg-secondary);color:var(--text-primary);border:1px solid var(--border-color);border-radius:12px;padding:12px;font-size:14px;cursor:pointer;min-height:44px;">Регистрация</button>
-        </div>
-    `);
-    document.getElementById('loginSubmitBtn').addEventListener('click', () => {
-        const email = document.getElementById('loginEmail').value.trim();
-        const pass = document.getElementById('loginPassword').value.trim();
-        if (!email || !pass) { alert('Введите email и пароль'); return; }
-        auth.signInWithEmailAndPassword(email, pass).catch(err => alert('Ошибка: ' + err.message));
-    });
-    document.getElementById('registerSubmitBtn').addEventListener('click', () => {
-        const email = document.getElementById('loginEmail').value.trim();
-        const pass = document.getElementById('loginPassword').value.trim();
-        if (!email || !pass) { alert('Введите email и пароль'); return; }
-        auth.createUserWithEmailAndPassword(email, pass)
-            .then((cred) => {
-                const name = email.split('@')[0];
-                const userId = generateUserId();
-                return usersRef.child(cred.user.uid).set({ name, userId });
-            })
-            .catch(err => alert('Ошибка: ' + err.message));
-    });
-}
-
-document.getElementById('logoutSidebarBtn').addEventListener('click', () => {
-    if (confirm('Выйти из аккаунта?')) auth.signOut();
-});
-
-createGroupBtn.addEventListener('click', createGroup);
-
-// ============================================================
-// WEBRTC ЗВОНКИ (упрощенная версия)
+// WEBRTC ЗВОНКИ (улучшенная версия)
 // ============================================================
 let peer = null;
 let currentCall = null;
 let localStream = null;
 let remoteStream = null;
+let peerInitialized = false;
+let peerReconnectTimer = null;
 
 function initPeer() {
     if (!currentUserId) return;
+    if (peerInitialized) return;
+    
     const peerId = 'user_' + currentUserId;
+    
     peer = new Peer(peerId, {
         debug: 2,
         config: {
             iceServers: [
                 { urls: 'stun:stun.l.google.com:19302' },
-                { urls: 'stun:stun1.l.google.com:19302' }
-            ]
+                { urls: 'stun:stun1.l.google.com:19302' },
+                { urls: 'stun:stun2.l.google.com:19302' },
+                { urls: 'stun:stun3.l.google.com:19302' },
+                { urls: 'stun:stun4.l.google.com:19302' },
+                { urls: 'stun:stun.ekiga.net' },
+                { urls: 'stun:stun.iptel.org' },
+                {
+                    urls: 'turn:numb.viagenie.ca',
+                    credential: 'muazkh',
+                    username: 'webrtc@live.com'
+                }
+            ],
+            iceTransportPolicy: 'all',
+            iceCandidatePoolSize: 10
         }
     });
+    
     peer.on('open', (id) => {
+        console.log('✅ PeerJS подключен:', id);
+        peerInitialized = true;
         usersRef.child(currentUser.uid + '/peerId').set(id);
+        showToast('✅ Голосовая связь готова');
+        if (peerReconnectTimer) {
+            clearTimeout(peerReconnectTimer);
+            peerReconnectTimer = null;
+        }
     });
+    
     peer.on('call', (call) => {
+        console.log('📞 Входящий звонок от:', call.peer);
         showIncomingCall(call);
     });
+    
     peer.on('error', (err) => {
-        console.error('Peer error:', err);
-        showToast('❌ Ошибка соединения: ' + err.message);
+        console.error('❌ PeerJS error:', err);
+        if (err.message.includes('Lost connection') || err.message.includes('Could not connect')) {
+            showToast('⚠️ Потеря соединения, переподключение...');
+            peerReconnectTimer = setTimeout(() => {
+                if (!peerInitialized) {
+                    peer.destroy();
+                    peer = null;
+                    peerInitialized = false;
+                    initPeer();
+                }
+            }, 3000);
+        } else if (err.message.includes('unavailable ID')) {
+            const newId = 'user_' + currentUserId + '_' + Date.now().toString(36);
+            peer.destroy();
+            peer = new Peer(newId, {
+                debug: 2,
+                config: {
+                    iceServers: [
+                        { urls: 'stun:stun.l.google.com:19302' },
+                        { urls: 'stun:stun1.l.google.com:19302' },
+                        { urls: 'stun:stun.ekiga.net' }
+                    ]
+                }
+            });
+            peer.on('open', (id) => {
+                usersRef.child(currentUser.uid + '/peerId').set(id);
+                peerInitialized = true;
+            });
+        }
     });
+    
+    peer.on('close', () => {
+        console.log('🔌 PeerJS соединение закрыто');
+        peerInitialized = false;
+        if (!peerReconnectTimer) {
+            peerReconnectTimer = setTimeout(() => {
+                peer = null;
+                initPeer();
+            }, 5000);
+        }
+    });
+    
+    setTimeout(() => {
+        if (!peerInitialized) {
+            console.warn('⚠️ PeerJS подключение зависло, перезапуск...');
+            if (peer) {
+                peer.destroy();
+                peer = null;
+            }
+            initPeer();
+        }
+    }, 10000);
 }
 
 function startCall(contactName, video = false) {
-    if (!peer) { showToast('❌ Соединение не готово'); return; }
+    if (!peer || !peerInitialized) {
+        showToast('❌ Соединение не готово, попробуйте позже');
+        return;
+    }
     usersRef.orderByChild('name').equalTo(contactName).once('value').then(snap => {
         let targetPeerId = null;
         snap.forEach(childSnap => {
@@ -3966,7 +3905,9 @@ function startCall(contactName, video = false) {
         navigator.mediaDevices.getUserMedia({ audio: true, video: video })
             .then(stream => {
                 localStream = stream;
-                const call = peer.call(targetPeerId, stream, { metadata: { caller: currentName, video: video } });
+                const call = peer.call(targetPeerId, stream, { 
+                    metadata: { caller: currentName, video: video } 
+                });
                 currentCall = call;
                 setupCallListeners(call);
             }).catch(err => {
@@ -4103,23 +4044,122 @@ document.getElementById('callVideoBtn').addEventListener('click', () => {
 });
 
 // ============================================================
+// АУТЕНТИФИКАЦИЯ
+// ============================================================
+auth.onAuthStateChanged(user => {
+    if (user) {
+        currentUser = user;
+        usersRef.child(user.uid).once('value').then(snap => {
+            const data = snap.val() || {};
+            let name = data.name;
+            let userId = data.userId;
+            if (!userId) {
+                userId = generateUserId();
+                usersRef.child(user.uid).update({ userId });
+            }
+            if (!name || name.startsWith('Гость')) {
+                if (user.email) name = user.email.split('@')[0];
+                else name = 'Гость' + Math.floor(Math.random() * 10000);
+                usersRef.child(user.uid).update({ name });
+            }
+            currentName = name;
+            currentUserId = userId;
+            headerUsername.textContent = currentName;
+            updateHeaderAvatar();
+            messageInput.disabled = false;
+            sendBtn.disabled = false;
+            statusDiv.textContent = '✅ Подключено';
+            statusDiv.className = 'status-bar';
+            loadContacts();
+            loadGroups();
+            switchContact('all');
+            setupOnlineStatus();
+            onlineRef.on('value', () => updateOnlineDots());
+            usersRef.once('value', (snapshot) => {
+                const data = snapshot.val() || {};
+                Object.keys(data).forEach(uid => {
+                    const u = data[uid];
+                    if (u.name && u.avatar) setAvatarCache(u.name, u.avatar);
+                });
+                renderChatList();
+            });
+            if ("Notification" in window && Notification.permission === "default") {
+                Notification.requestPermission();
+            }
+            // Инициализация PeerJS для звонков
+            setTimeout(initPeer, 1000);
+        });
+    } else {
+        if (onlineInterval) { clearInterval(onlineInterval); onlineInterval = null; }
+        if (currentUserId) onlineRef.child(sanitizeKey(currentUserId)).remove();
+        currentUser = null;
+        currentName = '';
+        currentUserId = '';
+        headerUsername.textContent = '—';
+        myAvatar.style.backgroundImage = '';
+        myAvatar.textContent = '?';
+        messageInput.disabled = true;
+        sendBtn.disabled = true;
+        statusDiv.textContent = '⏳ Войдите или зарегистрируйтесь';
+        messagesDiv.innerHTML = '';
+        chatList.innerHTML = '';
+        messagesRef.off();
+        messageListenerStarted = false;
+        contacts = {};
+        contactListArray = [];
+        unreadCounts = {};
+        unreadTotal = 0;
+        stopBlinking();
+        clearTypingListeners();
+        typingIndicator.style.display = 'none';
+        smartReplies.classList.remove('active');
+        showLoginModal();
+    }
+});
+
+function showLoginModal() {
+    showModal(`
+        <div class="modal-header">
+            <h2>🔐 Вход</h2>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+            <input type="email" id="loginEmail" placeholder="Email" class="input-field">
+            <input type="password" id="loginPassword" placeholder="Пароль" class="input-field">
+            <button id="loginSubmitBtn" style="background:var(--accent);color:#fff;border:none;border-radius:12px;padding:12px;font-size:16px;font-weight:600;cursor:pointer;min-height:44px;">Войти</button>
+            <button id="registerSubmitBtn" style="background:var(--bg-secondary);color:var(--text-primary);border:1px solid var(--border-color);border-radius:12px;padding:12px;font-size:14px;cursor:pointer;min-height:44px;">Регистрация</button>
+        </div>
+    `);
+    document.getElementById('loginSubmitBtn').addEventListener('click', () => {
+        const email = document.getElementById('loginEmail').value.trim();
+        const pass = document.getElementById('loginPassword').value.trim();
+        if (!email || !pass) { alert('Введите email и пароль'); return; }
+        auth.signInWithEmailAndPassword(email, pass).catch(err => alert('Ошибка: ' + err.message));
+    });
+    document.getElementById('registerSubmitBtn').addEventListener('click', () => {
+        const email = document.getElementById('loginEmail').value.trim();
+        const pass = document.getElementById('loginPassword').value.trim();
+        if (!email || !pass) { alert('Введите email и пароль'); return; }
+        auth.createUserWithEmailAndPassword(email, pass)
+            .then((cred) => {
+                const name = email.split('@')[0];
+                const userId = generateUserId();
+                return usersRef.child(cred.user.uid).set({ name, userId });
+            })
+            .catch(err => alert('Ошибка: ' + err.message));
+    });
+}
+
+document.getElementById('logoutSidebarBtn').addEventListener('click', () => {
+    if (confirm('Выйти из аккаунта?')) auth.signOut();
+});
+
+createGroupBtn.addEventListener('click', createGroup);
+
+// ============================================================
 // ЗАПУСК
 // ============================================================
 console.log('🚀 ICQ-чат v5.0 запущен!');
-console.log('✅ Уникальные ID пользователей');
-console.log('✅ Поиск по ID и сообщениям');
-console.log('✅ Контекстное меню');
-console.log('✅ Трехпанельный макет');
-console.log('✅ Нижний таб-бар для мобильных');
-console.log('✅ Голосовые сообщения с ускорением');
-console.log('✅ Drag-and-Drop файлов');
-console.log('✅ Горячие клавиши');
-console.log('✅ Папки для чатов');
-console.log('✅ Микроанимации и скелетоны');
-console.log('✅ Групповые чаты');
-console.log('✅ Предпросмотр ссылок');
-console.log('✅ Умные ответы');
-console.log('✅ Аудио/видео звонки (WebRTC)');
+console.log('✅ Все функции интегрированы');
 </script>
 </body>
 </html>
