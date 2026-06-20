@@ -275,15 +275,22 @@
         const typingRef = db.ref('typing');
 
         // ============================================================
-        // CATBOX.MOE - НЕ ТРЕБУЕТ РЕГИСТРАЦИИ!
+        // ЭКРАНИРОВАНИЕ ДЛЯ FIREBASE (УБИРАЕМ ТОЧКИ)
         // ============================================================
-        async function uploadToCatbox(file) {
+        function sanitizeKey(name) {
+            if (!name) return 'unknown';
+            return name.replace(/[.#$\[\]]/g, '_');
+        }
+
+        // ============================================================
+        // 0x0.ST - РАБОТАЕТ БЕЗ CORS!
+        // ============================================================
+        async function uploadTo0x0(file) {
             const formData = new FormData();
-            formData.append('fileToUpload', file);
-            formData.append('reqtype', 'fileupload');
+            formData.append('file', file);
             
             try {
-                const response = await fetch('https://catbox.moe/user/api.php', {
+                const response = await fetch('https://0x0.st', {
                     method: 'POST',
                     body: formData
                 });
@@ -400,8 +407,6 @@
         let notificationsEnabled = true;
         let currentTheme = 'dark';
         let messageStatuses = {};
-
-        function sanitizeKey(name) { if (!name) return 'unknown'; return name.replace(/[.#$\[\]]/g, '_'); }
 
         // ============================================================
         // ТЕМА
@@ -782,17 +787,17 @@
         }
 
         // ============================================================
-        // ФАЙЛЫ (Catbox.moe)
+        // ФАЙЛЫ (0x0.st)
         // ============================================================
         function shareFile(file) {
             if (!currentUser) { alert('Войдите в систему'); return; }
             const to = recipientInput.value.trim() || null;
-            addSystemMessage('📤 Загружаем файл "' + file.name + '" на Catbox...');
+            addSystemMessage('📤 Загружаем файл "' + file.name + '" на 0x0.st...');
             fileBtn.style.opacity = '0.5';
             fileBtn.disabled = true;
-            uploadToCatbox(file)
+            uploadTo0x0(file)
                 .then((result) => {
-                    addSystemMessage('✅ Файл загружен на Catbox!');
+                    addSystemMessage('✅ Файл загружен на 0x0.st!');
                     const payload = {
                         name: currentName,
                         text: result.directLink,
@@ -831,8 +836,8 @@
         fileInput.onchange = (e) => {
             if (e.target.files.length) {
                 const file = e.target.files[0];
-                if (file.size > 200 * 1024 * 1024) {
-                    alert('Файл слишком большой (максимум 200MB для Catbox)');
+                if (file.size > 512 * 1024 * 1024) {
+                    alert('Файл слишком большой (максимум 512MB для 0x0.st)');
                     fileInput.value = '';
                     return;
                 }
@@ -840,6 +845,67 @@
                 fileInput.value = '';
             }
         };
+
+        // ============================================================
+        // ПЕЧАТЬ (С ЭКРАНИРОВАНИЕМ)
+        // ============================================================
+        function setupTypingListener() {
+            if (!currentName) return;
+            const safeName = sanitizeKey(currentName);
+            const safeContact = currentContact === 'all' ? 'all' : sanitizeKey(currentContact);
+            const typingRefPath = typingRef.child(safeContact);
+            
+            typingRefPath.on('value', (snapshot) => {
+                const data = snapshot.val() || {};
+                const typingUsers = Object.keys(data).filter(name => name !== safeName);
+                if (typingUsers.length > 0) {
+                    let display = '';
+                    if (typingUsers.length === 1) {
+                        display = typingUsers[0] + ' печатает...';
+                    } else if (typingUsers.length === 2) {
+                        display = typingUsers[0] + ' и ' + typingUsers[1] + ' печатают...';
+                    } else {
+                        display = typingUsers.length + ' человек печатают...';
+                    }
+                    typingNames.textContent = display;
+                    typingIndicator.style.display = 'flex';
+                } else {
+                    typingIndicator.style.display = 'none';
+                }
+            });
+        }
+
+        function clearTypingListeners() {
+            const safeContact = currentContact === 'all' ? 'all' : sanitizeKey(currentContact);
+            typingRef.child(safeContact).off();
+        }
+
+        function sendTypingStatus() {
+            if (!currentName || !currentUser) return;
+            const safeName = sanitizeKey(currentName);
+            const safeContact = currentContact === 'all' ? 'all' : sanitizeKey(currentContact);
+            const ref = typingRef.child(safeContact).child(safeName);
+            ref.set(true);
+            if (typingTimeout) clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => ref.remove(), 3000);
+        }
+
+        let typingThrottle = null;
+        input.addEventListener('input', () => {
+            if (input.value.trim()) {
+                if (!typingThrottle) { sendTypingStatus();
+                    typingThrottle = setTimeout(() => { typingThrottle = null; }, 2000); }
+            }
+        });
+
+        function clearTypingStatus() {
+            if (!currentName) return;
+            const safeName = sanitizeKey(currentName);
+            const safeContact = currentContact === 'all' ? 'all' : sanitizeKey(currentContact);
+            typingRef.child(safeContact).child(safeName).remove();
+            if (typingTimeout) { clearTimeout(typingTimeout);
+                typingTimeout = null; }
+        }
 
         // ============================================================
         // СООБЩЕНИЯ
@@ -1382,54 +1448,6 @@
         }
 
         // ============================================================
-        // ПЕЧАТЬ
-        // ============================================================
-        function setupTypingListener() {
-            if (!currentName) return;
-            const typingPath = currentContact === 'all' ? 'all' : currentContact;
-            const typingRefPath = typingRef.child(typingPath);
-            typingRefPath.on('value', (snapshot) => {
-                const data = snapshot.val() || {};
-                const typingUsers = Object.keys(data).filter(name => name !== currentName);
-                if (typingUsers.length > 0) {
-                    let display = '';
-                    if (typingUsers.length === 1) { display = typingUsers[0] + ' печатает...'; } else if (
-                        typingUsers.length === 2) { display = typingUsers[0] + ' и ' + typingUsers[1] +
-                            ' печатают...'; } else { display = typingUsers.length + ' человек печатают...'; }
-                    typingNames.textContent = display;
-                    typingIndicator.style.display = 'flex';
-                } else { typingIndicator.style.display = 'none'; }
-            });
-        }
-
-        function clearTypingListeners() { const typingPath = currentContact === 'all' ? 'all' : currentContact;
-            typingRef.child(typingPath).off(); }
-
-        function sendTypingStatus() {
-            if (!currentName || !currentUser) return;
-            const typingPath = currentContact === 'all' ? 'all' : currentContact;
-            const ref = typingRef.child(typingPath).child(currentName);
-            ref.set(true);
-            if (typingTimeout) clearTimeout(typingTimeout);
-            typingTimeout = setTimeout(() => ref.remove(), 3000);
-        }
-        let typingThrottle = null;
-        input.addEventListener('input', () => {
-            if (input.value.trim()) {
-                if (!typingThrottle) { sendTypingStatus();
-                    typingThrottle = setTimeout(() => { typingThrottle = null; }, 2000); }
-            }
-        });
-
-        function clearTypingStatus() {
-            if (!currentName) return;
-            const typingPath = currentContact === 'all' ? 'all' : currentContact;
-            typingRef.child(typingPath).child(currentName).remove();
-            if (typingTimeout) { clearTimeout(typingTimeout);
-                typingTimeout = null; }
-        }
-
-        // ============================================================
         // НОВЫЕ СООБЩЕНИЯ
         // ============================================================
         function updateNewMessagesBtn() {
@@ -1675,7 +1693,7 @@
             }
         });
 
-        console.log('🚀 ICQ-чат загружен! Catbox.moe + статусы сообщений');
+        console.log('🚀 ICQ-чат загружен! 0x0.st + статусы сообщений');
         console.log('📱 Добавьте страницу на рабочий стол через браузер');
     </script>
 </body>
