@@ -285,7 +285,7 @@
         }
 
         // ============================================================
-        // TMPFILES.ORG - БЕЗ CORS, БЕЗ РЕГИСТРАЦИИ
+        // TMPFILES.ORG - ПРЯМАЯ ССЫЛКА
         // ============================================================
         async function uploadToTmpFiles(file) {
             const formData = new FormData();
@@ -307,8 +307,11 @@
                     throw new Error('Ошибка: ' + (data.message || 'Неизвестная ошибка'));
                 }
 
-                // Получаем прямую ссылку на скачивание
-                const directLink = data.data.url;
+                // Получаем ID файла и строим прямую ссылку на скачивание
+                const fileUrl = data.data.url;
+                const fileId = fileUrl.split('/').pop();
+                const directLink = 'https://tmpfiles.org/dl/' + fileId;
+
                 return {
                     directLink: directLink,
                     fileName: file.name,
