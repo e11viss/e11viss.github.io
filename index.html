@@ -4,17 +4,13 @@
     <meta charset="UTF-8">
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
     <title>ICQ-чат</title>
-    
-    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
-    
-    <!-- PeerJS для P2P -->
-    <script src="https://unpkg.com/peerjs@1.5.1/dist/peerjs.min.js"></script>
-    
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         html, body {
@@ -79,24 +75,6 @@
             position: relative;
         }
 
-        /* ===== P2P СТАТУС ===== */
-        #p2pStatus {
-            position: fixed;
-            bottom: 80px;
-            left: 10px;
-            z-index: 999;
-            font-size: 11px;
-            color: var(--text-muted);
-            background: var(--bg-panel);
-            padding: 4px 10px;
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
-            transition: all 0.3s;
-        }
-        #p2pStatus.connected { color: var(--success); border-color: var(--success); }
-        #p2pStatus.connecting { color: #ffd60a; border-color: #ffd60a; }
-
-        /* ===== ПАНЕЛЬ КОНТАКТОВ ===== */
         .contact-panel {
             width: 280px;
             background: var(--bg-panel);
@@ -345,7 +323,6 @@
         }
         .contact-item .remove-contact:hover { color: var(--danger); }
 
-        /* ===== ПАНЕЛЬ ЧАТА ===== */
         .chat-panel {
             flex: 1;
             display: flex;
@@ -511,24 +488,21 @@
             word-wrap: break-word;
             overflow-wrap: break-word;
         }
-        .message-row .bubble .file-info {
-            font-size: 13px;
-            padding: 4px 8px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 8px;
-            margin-top: 4px;
-        }
-        .message-row .bubble .file-info .filename {
+        .message-row .bubble .file-link {
+            display: inline-block;
+            padding: 4px 12px;
+            background: rgba(10,132,255,0.2);
+            border-radius: 12px;
+            color: var(--accent);
+            text-decoration: none;
             font-weight: 500;
+            border: 1px solid rgba(10,132,255,0.4);
+            cursor: pointer;
         }
-        .message-row .bubble .file-info .size {
-            color: var(--text-muted);
-            font-size: 11px;
-        }
-        .message-row .bubble .file-progress {
-            font-size: 12px;
-            color: var(--text-muted);
-            margin-top: 4px;
+        .message-row.mine .bubble .file-link {
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+            border-color: rgba(255,255,255,0.4);
         }
         .message-row .bubble .time {
             font-size: 10px;
@@ -780,6 +754,90 @@
             color: var(--text-muted);
         }
 
+        /* ===== МОДАЛЬНОЕ ОКНО НАСТРОЕК ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: var(--modal-bg);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: var(--bg-panel);
+            border-radius: 16px;
+            padding: 24px 28px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 20px 60px var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+        .modal .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .modal .modal-header h2 {
+            font-size: 20px;
+            color: var(--text-primary);
+        }
+        .modal .modal-header .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 4px 8px;
+        }
+        .modal .modal-header .close-btn:hover { color: var(--danger); }
+        .modal .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .modal .setting-item:last-child { border-bottom: none; }
+        .modal .setting-item .label {
+            font-size: 15px;
+            color: var(--text-primary);
+        }
+        .modal .setting-item .desc {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+        .modal .toggle-switch {
+            position: relative;
+            width: 48px;
+            height: 28px;
+            background: var(--text-muted);
+            border-radius: 14px;
+            cursor: pointer;
+            transition: background 0.3s;
+            flex-shrink: 0;
+        }
+        .modal .toggle-switch.active {
+            background: var(--accent);
+        }
+        .modal .toggle-switch .slider {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .modal .toggle-switch.active .slider {
+            transform: translateX(20px);
+        }
+
         /* ===== BOTTOM SHEET (мобильное меню) ===== */
         .bottom-sheet {
             display: none;
@@ -957,7 +1015,6 @@
             .input-area .message-input { font-size: 14px; padding: 8px 12px; min-width: 50px; }
             .input-area .send-btn { padding: 8px 14px; font-size: 13px; }
             .input-area .file-btn { font-size: 20px; padding: 6px; }
-            #p2pStatus { bottom: 70px; font-size: 10px; }
         }
         @media (max-width: 400px) {
             .contact-panel { width: 100%; max-width: none; }
@@ -968,8 +1025,6 @@
     </style>
 </head>
 <body>
-
-<div id="p2pStatus">⏳ P2P: инициализация...</div>
 
 <div class="chat-app">
     <div class="contact-panel-overlay" id="contactPanelOverlay"></div>
@@ -1027,14 +1082,14 @@
             <button class="emoji-btn" id="emojiBtn">😊</button>
             <div class="emoji-panel" id="emojiPanel"></div>
             <input type="text" class="message-input" id="messageInput" placeholder="Написать сообщение..." disabled>
-            <button class="file-btn" id="fileBtn" title="Отправить файл через P2P">📎</button>
+            <button class="file-btn" id="fileBtn" title="Прикрепить файл">📎</button>
             <button class="send-btn" id="sendBtn" disabled>Отправить</button>
         </div>
         <input type="file" id="fileInput" accept="*/*">
     </div>
 </div>
 
-<!-- BOTTOM SHEET (мобильное контекстное меню) -->
+<!-- BOTTOM SHEET -->
 <div class="bottom-sheet-overlay" id="bottomSheetOverlay"></div>
 <div class="bottom-sheet" id="bottomSheet">
     <div class="handle"></div>
@@ -1062,6 +1117,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth();
 const db = firebase.database();
+const storage = firebase.storage();
 const messagesRef = db.ref('messages');
 const usersRef = db.ref('users');
 const typingRef = db.ref('typing');
@@ -1108,7 +1164,6 @@ const newMessagesCount = document.getElementById('newMessagesCount');
 const typingIndicator = document.getElementById('typingIndicator');
 const typingNames = document.getElementById('typingNames');
 const settingsBtn = document.getElementById('settingsBtn');
-const p2pStatus = document.getElementById('p2pStatus');
 
 // ============================================================
 // СОСТОЯНИЕ
@@ -1132,261 +1187,8 @@ let messageListenerStarted = false;
 let notificationsEnabled = true;
 let currentTheme = 'dark';
 
-// P2P
-let peer = null;
-let peerConnections = {};
-let p2pReady = false;
-let pendingFile = null;
-let pendingFileReceiver = null;
-
 // ============================================================
-// P2P - PEERJS
-// ============================================================
-function initP2P() {
-    if (!currentUser || !currentName) return;
-    if (peer) return;
-    
-    if (typeof Peer === 'undefined') {
-        p2pStatus.textContent = '❌ P2P: библиотека не загружена';
-        return;
-    }
-    
-    try {
-        peer = new Peer(currentUser.uid, {
-            debug: 2,
-            config: {
-                iceServers: [
-                    { urls: 'stun:stun.l.google.com:19302' },
-                    { urls: 'stun:stun1.l.google.com:19302' },
-                    { urls: 'stun:stun2.l.google.com:19302' },
-                    { urls: 'stun:stun3.l.google.com:19302' }
-                ]
-            }
-        });
-        
-        peer.on('open', (id) => {
-            console.log('✅ P2P Peer ID:', id);
-            p2pReady = true;
-            usersRef.child(currentUser.uid + '/peerId').set(id);
-            updateP2PStatus('connected', '🔄 P2P: готов');
-        });
-        
-        peer.on('connection', (conn) => {
-            console.log('📡 P2P соединение от:', conn.peer);
-            peerConnections[conn.peer] = conn;
-            setupP2PConnection(conn);
-            updateP2PStatus('connected', '🔄 P2P: ' + Object.keys(peerConnections).length + ' соединений');
-        });
-        
-        peer.on('error', (err) => {
-            console.warn('⚠️ P2P ошибка:', err);
-            if (err.type === 'peer-unavailable') {
-                updateP2PStatus('connecting', '⏳ P2P: пользователь не в сети');
-            } else {
-                updateP2PStatus('connecting', '⏳ P2P: ошибка');
-            }
-        });
-        
-        peer.on('disconnected', () => {
-            console.log('❌ P2P отключен');
-            p2pReady = false;
-            updateP2PStatus('connecting', '⏳ P2P: переподключение...');
-            setTimeout(() => { if (peer) peer.reconnect(); }, 3000);
-        });
-        
-        // Следим за peerId контактов
-        usersRef.on('child_changed', (snap) => {
-            const data = snap.val();
-            if (data.peerId) {
-                // Проверяем, есть ли этот пользователь в контактах
-                const uid = snap.key;
-                usersRef.child(uid + '/name').once('value', (nameSnap) => {
-                    const name = nameSnap.val();
-                    if (name && contactListArray.includes(name)) {
-                        // Пытаемся соединиться
-                        connectToPeer(name, data.peerId);
-                    }
-                });
-            }
-        });
-    } catch (err) {
-        console.warn('⚠️ P2P init error:', err);
-        p2pStatus.textContent = '⚠️ P2P: ошибка инициализации';
-    }
-}
-
-function connectToPeer(name, peerId) {
-    if (!peer || !p2pReady) return;
-    if (peerConnections[peerId]) return;
-    if (peerId === peer.id) return;
-    
-    try {
-        const conn = peer.connect(peerId);
-        peerConnections[peerId] = conn;
-        setupP2PConnection(conn);
-        console.log('📡 P2P подключаюсь к:', name, peerId);
-    } catch (err) {
-        console.warn('P2P connect error:', err);
-    }
-}
-
-function setupP2PConnection(conn) {
-    conn.on('open', () => {
-        console.log('✅ P2P соединение открыто:', conn.peer);
-        updateP2PStatus('connected', '🔄 P2P: ' + Object.keys(peerConnections).length + ' соединений');
-    });
-    
-    conn.on('data', (data) => {
-        if (data.type === 'file') {
-            // Получение файла
-            try {
-                const blob = new Blob([data.data], { type: data.mimeType || 'application/octet-stream' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = data.name || 'file_from_peer';
-                document.body.appendChild(a);
-                a.click();
-                document.body.removeChild(a);
-                setTimeout(() => URL.revokeObjectURL(url), 5000);
-                addSystemMessage('📥 Получен файл "' + data.name + '" через P2P (' + (data.size/1024/1024).toFixed(2) + ' MB)');
-            } catch (err) {
-                console.warn('P2P file receive error:', err);
-                addSystemMessage('❌ Ошибка получения файла: ' + err.message);
-            }
-        } else if (data.type === 'file_request') {
-            // Запрос на отправку файла
-            if (pendingFile && pendingFileReceiver === conn.peer) {
-                sendFileP2P(conn, pendingFile);
-                pendingFile = null;
-                pendingFileReceiver = null;
-                fileBtn.classList.remove('has-file');
-            }
-        }
-    });
-    
-    conn.on('close', () => {
-        console.log('P2P соединение закрыто:', conn.peer);
-        delete peerConnections[conn.peer];
-        updateP2PStatus('connected', '🔄 P2P: ' + Object.keys(peerConnections).length + ' соединений');
-    });
-}
-
-function updateP2PStatus(state, text) {
-    p2pStatus.textContent = text;
-    p2pStatus.className = state === 'connected' ? 'connected' : (state === 'connecting' ? 'connecting' : '');
-}
-
-function sendFileP2P(conn, file) {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        try {
-            conn.send({
-                type: 'file',
-                name: file.name,
-                size: file.size,
-                data: e.target.result,
-                mimeType: file.type
-            });
-            addSystemMessage('📤 Файл "' + file.name + '" отправлен через P2P (' + (file.size/1024/1024).toFixed(2) + ' MB)');
-        } catch (err) {
-            console.warn('P2P send error:', err);
-            addSystemMessage('❌ Ошибка отправки файла: ' + err.message);
-        }
-    };
-    reader.readAsArrayBuffer(file);
-}
-
-function shareFileP2P(file) {
-    const receiver = recipientInput.value.trim();
-    if (!receiver) {
-        alert('Укажите получателя в поле "Кому".');
-        return;
-    }
-    if (receiver === currentName) {
-        alert('Нельзя отправить файл самому себе.');
-        return;
-    }
-    
-    // Находим peerId получателя
-    usersRef.orderByChild('name').equalTo(receiver).once('value', (snap) => {
-        let targetPeerId = null;
-        snap.forEach((childSnap) => {
-            const data = childSnap.val();
-            if (data.peerId) targetPeerId = data.peerId;
-        });
-        
-        if (!targetPeerId) {
-            alert('Пользователь не в сети или не поддерживает P2P');
-            return;
-        }
-        
-        // Проверяем соединение
-        let conn = peerConnections[targetPeerId];
-        if (!conn) {
-            conn = peer.connect(targetPeerId);
-            peerConnections[targetPeerId] = conn;
-            setupP2PConnection(conn);
-        }
-        
-        conn.on('open', () => {
-            // Отправляем запрос на файл, затем сам файл
-            conn.send({ type: 'file_request' });
-            // Небольшая задержка перед отправкой
-            setTimeout(() => {
-                sendFileP2P(conn, file);
-            }, 500);
-        });
-    });
-}
-
-// ============================================================
-// ФАЙЛЫ
-// ============================================================
-fileBtn.addEventListener('click', () => {
-    if (!currentUser) {
-        alert('Войдите в систему');
-        return;
-    }
-    if (!p2pReady) {
-        alert('P2P не готов. Подождите подключения...');
-        return;
-    }
-    fileInput.click();
-});
-
-fileInput.onchange = (e) => {
-    if (e.target.files.length) {
-        const file = e.target.files[0];
-        // Проверяем размер (максимум 100MB)
-        if (file.size > 100 * 1024 * 1024) {
-            alert('Файл слишком большой (максимум 100MB)');
-            fileInput.value = '';
-            return;
-        }
-        pendingFile = file;
-        pendingFileReceiver = null;
-        fileBtn.classList.add('has-file');
-        addSystemMessage('📎 Выбран файл "' + file.name + '" (' + (file.size/1024/1024).toFixed(2) + ' MB)');
-        shareFileP2P(file);
-        fileInput.value = '';
-        fileBtn.classList.remove('has-file');
-    }
-};
-
-function addSystemMessage(text) {
-    const div = document.createElement('div');
-    div.className = 'message-row system';
-    const bubble = document.createElement('div');
-    bubble.className = 'bubble';
-    bubble.textContent = text;
-    div.appendChild(bubble);
-    messagesDiv.appendChild(div);
-    if (isAtBottom) messagesDiv.scrollTop = messagesDiv.scrollHeight;
-}
-
-// ============================================================
-// ТЕМА (через меню настроек)
+// ТЕМА
 // ============================================================
 function loadTheme() {
     const saved = localStorage.getItem('chatTheme');
@@ -1403,7 +1205,7 @@ function toggleTheme() {
     localStorage.setItem('chatTheme', currentTheme);
 }
 
-// Меню настроек (простое модальное окно)
+// Меню настроек
 settingsBtn.addEventListener('click', () => {
     const overlay = document.createElement('div');
     overlay.className = 'modal-overlay active';
@@ -1448,7 +1250,6 @@ settingsBtn.addEventListener('click', () => {
     overlay.appendChild(modal);
     document.body.appendChild(overlay);
     
-    // Закрытие
     modal.querySelector('.close-btn').addEventListener('click', () => overlay.remove());
     overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
     
@@ -1480,13 +1281,6 @@ settingsBtn.addEventListener('click', () => {
             currentName = trimmed;
             updateHeaderUsername(currentName);
             overlay.remove();
-            // Перезагружаем P2P
-            if (peer) {
-                peer.destroy();
-                peer = null;
-                p2pReady = false;
-                setTimeout(initP2P, 1000);
-            }
         }
     });
 });
@@ -1640,17 +1434,6 @@ function loadContacts() {
     usersRef.child(currentUser.uid + '/contacts').once('value').then(snap => {
         contactListArray = snap.val() || [];
         renderContacts();
-        // Подключаемся P2P к контактам
-        contactListArray.forEach(name => {
-            usersRef.orderByChild('name').equalTo(name).once('value', (snap) => {
-                snap.forEach((childSnap) => {
-                    const data = childSnap.val();
-                    if (data.peerId) {
-                        connectToPeer(name, data.peerId);
-                    }
-                });
-            });
-        });
     });
 }
 
@@ -1668,15 +1451,6 @@ function addContact(contactName) {
     contactListArray.push(contactName);
     saveContacts();
     renderContacts();
-    // Подключаемся P2P
-    usersRef.orderByChild('name').equalTo(contactName).once('value', (snap) => {
-        snap.forEach((childSnap) => {
-            const data = childSnap.val();
-            if (data.peerId) {
-                connectToPeer(contactName, data.peerId);
-            }
-        });
-    });
 }
 
 function removeContact(contactName) {
@@ -1813,7 +1587,10 @@ function switchContact(id) {
     messageNodes = {};
     messagesCache = [];
     messagesRef.off();
+    messageListenerStarted = false;
     listenMessages();
+    clearTypingListeners();
+    setupTypingListener();
 }
 
 // ============================================================
@@ -1969,7 +1746,14 @@ function createMessageRow(key, data) {
     const textDiv = document.createElement('div');
     textDiv.className = 'text';
     
-    if (data.text) {
+    if (data.fileUrl) {
+        const link = document.createElement('a');
+        link.className = 'file-link';
+        link.href = data.fileUrl;
+        link.target = '_blank';
+        link.textContent = '📎 ' + (data.fileName || 'Файл');
+        textDiv.appendChild(link);
+    } else if (data.text) {
         const lines = data.text.split('\n');
         lines.forEach((line, i) => {
             if (i > 0) textDiv.appendChild(document.createElement('br'));
@@ -1981,7 +1765,7 @@ function createMessageRow(key, data) {
     
     bubble.appendChild(textDiv);
 
-    // Реакции
+    // Реакции (только если есть)
     if (data.reactions) {
         const reactionsContainer = document.createElement('div');
         reactionsContainer.className = 'reactions';
@@ -2323,6 +2107,53 @@ function updateContactsFromCache() {
 }
 
 // ============================================================
+// ФАЙЛЫ (через Firebase Storage)
+// ============================================================
+function uploadFile(file) {
+    if (!currentUser) {
+        alert('Войдите в систему');
+        return;
+    }
+    
+    const receiver = recipientInput.value.trim() || null;
+    const filePath = 'files/' + Date.now() + '_' + file.name;
+    const uploadTask = storage.ref(filePath).put(file);
+    
+    addSystemMessage('📤 Загрузка файла "' + file.name + '"...');
+    fileBtn.style.opacity = '0.5';
+    fileBtn.disabled = true;
+    
+    uploadTask.on('state_changed', 
+        (snapshot) => {
+            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            // Можно показать прогресс
+        },
+        (error) => {
+            console.error('Ошибка загрузки:', error);
+            addSystemMessage('❌ Ошибка загрузки файла: ' + error.message);
+            fileBtn.style.opacity = '1';
+            fileBtn.disabled = false;
+        },
+        () => {
+            uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+                const payload = {
+                    name: currentName,
+                    text: '',
+                    fileUrl: downloadURL,
+                    fileName: file.name,
+                    to: receiver,
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                };
+                messagesRef.push(payload);
+                addSystemMessage('✅ Файл "' + file.name + '" загружен!');
+                fileBtn.style.opacity = '1';
+                fileBtn.disabled = false;
+            });
+        }
+    );
+}
+
+// ============================================================
 // ОТПРАВКА
 // ============================================================
 function sendMessage(text) {
@@ -2361,6 +2192,39 @@ input.onkeydown = (e) => {
         input.selectionStart = input.selectionEnd = start + 1;
     }
 };
+
+// Файлы
+fileBtn.addEventListener('click', () => {
+    if (!currentUser) {
+        alert('Войдите в систему');
+        return;
+    }
+    fileInput.click();
+});
+
+fileInput.onchange = (e) => {
+    if (e.target.files.length) {
+        const file = e.target.files[0];
+        if (file.size > 50 * 1024 * 1024) {
+            alert('Файл слишком большой (максимум 50MB)');
+            fileInput.value = '';
+            return;
+        }
+        uploadFile(file);
+        fileInput.value = '';
+    }
+};
+
+function addSystemMessage(text) {
+    const div = document.createElement('div');
+    div.className = 'message-row system';
+    const bubble = document.createElement('div');
+    bubble.className = 'bubble';
+    bubble.textContent = text;
+    div.appendChild(bubble);
+    messagesDiv.appendChild(div);
+    if (isAtBottom) messagesDiv.scrollTop = messagesDiv.scrollHeight;
+}
 
 // ============================================================
 // ПЕЧАТЬ
@@ -2545,7 +2409,6 @@ auth.onAuthStateChanged(user => {
             updateUnreadBadge(0);
             messageListenerStarted = false;
             listenMessages();
-            setTimeout(initP2P, 2000);
         });
     } else {
         currentUser = null;
@@ -2579,12 +2442,6 @@ auth.onAuthStateChanged(user => {
         stopBlinking();
         clearTypingListeners();
         typingIndicator.style.display = 'none';
-        if (peer) {
-            peer.destroy();
-            peer = null;
-            p2pReady = false;
-            p2pStatus.textContent = '⏳ P2P: неактивен';
-        }
     }
 });
 
@@ -2686,20 +2543,13 @@ myAvatar.addEventListener('dblclick', () => {
         currentName = newNameTrim;
         updateHeaderUsername(currentName);
         updateHeaderAvatar();
-        // Перезапускаем P2P
-        if (peer) {
-            peer.destroy();
-            peer = null;
-            p2pReady = false;
-            setTimeout(initP2P, 1000);
-        }
     }
 });
 
 // ============================================================
 // ЗАПУСК
 // ============================================================
-console.log('🚀 ICQ-чат загружен! P2P файлообмен через WebRTC');
+console.log('🚀 ICQ-чат загружен!');
 console.log('📱 Добавьте страницу на рабочий стол через браузер');
 </script>
 </body>
