@@ -12,7 +12,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/webtorrent@latest/webtorrent.min.js"></script>
     <style>
-        /* === ВСЕ СТИЛИ КАК В ПРЕДЫДУЩЕЙ ВЕРСИИ === */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         html, body {
             width: 100%;
@@ -25,191 +24,1027 @@
             color: #e5e5ea;
         }
         body { display: flex; flex-direction: column; }
+
         :root {
-            --bg-primary: #1a1a1e; --bg-secondary: #2c2c30; --bg-panel: #242428;
-            --bg-input: #1c1c20; --bg-hover: #33333a; --bg-active: #3a3a44;
-            --border-color: #3a3a40; --text-primary: #e5e5ea; --text-secondary: #8e8e93;
-            --text-muted: #636366; --accent: #0a84ff; --accent-hover: #0070e0;
-            --success: #30d158; --danger: #ff453a; --shadow: rgba(0,0,0,0.3);
-            --bubble-mine: #0a84ff; --bubble-other: #2c2c30; --modal-bg: rgba(0,0,0,0.7);
+            --bg-primary: #1a1a1e;
+            --bg-secondary: #2c2c30;
+            --bg-panel: #242428;
+            --bg-input: #1c1c20;
+            --bg-hover: #33333a;
+            --bg-active: #3a3a44;
+            --border-color: #3a3a40;
+            --text-primary: #e5e5ea;
+            --text-secondary: #8e8e93;
+            --text-muted: #636366;
+            --accent: #0a84ff;
+            --accent-hover: #0070e0;
+            --success: #30d158;
+            --danger: #ff453a;
+            --shadow: rgba(0,0,0,0.3);
+            --bubble-mine: #0a84ff;
+            --bubble-other: #2c2c30;
+            --modal-bg: rgba(0,0,0,0.7);
         }
+
         [data-theme="light"] {
-            --bg-primary: #f0f0f2; --bg-secondary: #ffffff; --bg-panel: #f8f8fa;
-            --bg-input: #ffffff; --bg-hover: #e5e5ea; --bg-active: #d1d1d6;
-            --border-color: #c6c6c8; --text-primary: #1c1c1e; --text-secondary: #3a3a3c;
-            --text-muted: #8e8e93; --accent: #007aff; --accent-hover: #0055cc;
-            --shadow: rgba(0,0,0,0.1); --bubble-mine: #007aff; --bubble-other: #e5e5ea;
+            --bg-primary: #f0f0f2;
+            --bg-secondary: #ffffff;
+            --bg-panel: #f8f8fa;
+            --bg-input: #ffffff;
+            --bg-hover: #e5e5ea;
+            --bg-active: #d1d1d6;
+            --border-color: #c6c6c8;
+            --text-primary: #1c1c1e;
+            --text-secondary: #3a3a3c;
+            --text-muted: #8e8e93;
+            --accent: #007aff;
+            --accent-hover: #0055cc;
+            --shadow: rgba(0,0,0,0.1);
+            --bubble-mine: #007aff;
+            --bubble-other: #e5e5ea;
             --modal-bg: rgba(0,0,0,0.5);
         }
-        .chat-app { display: flex; width: 100%; height: 100vh; height: 100dvh; background: var(--bg-secondary); overflow: hidden; position: relative; }
-        .contact-panel { width: 280px; background: var(--bg-panel); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; flex-shrink: 0; height: 100%; overflow: hidden; transition: transform 0.3s, background 0.3s; z-index: 10; }
-        .contact-panel .header { padding: 14px 18px 10px 18px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; }
-        .contact-panel .header .title { font-weight: 700; font-size: 20px; color: var(--text-primary); display: flex; align-items: baseline; gap: 6px; }
-        .contact-panel .header .title .username { font-weight: 400; font-size: 16px; color: var(--text-secondary); }
-        .contact-panel .header .profile-icon { width: 38px; height: 38px; border-radius: 50%; background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 17px; cursor: pointer; overflow: hidden; background-size: cover; background-position: center; flex-shrink: 0; }
-        .login-area { display: flex; flex-wrap: wrap; gap: 6px; padding: 8px 14px 12px 14px; border-bottom: 1px solid var(--border-color); align-items: center; flex-shrink: 0; }
-        .login-area input { flex: 1 1 100px; min-width: 60px; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 20px; font-size: 14px; outline: none; background: var(--bg-input); color: var(--text-primary); }
+
+        .chat-app {
+            display: flex;
+            width: 100%;
+            height: 100vh;
+            height: 100dvh;
+            background: var(--bg-secondary);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .contact-panel {
+            width: 280px;
+            background: var(--bg-panel);
+            border-right: 1px solid var(--border-color);
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            height: 100%;
+            overflow: hidden;
+            transition: transform 0.3s, background 0.3s;
+            z-index: 10;
+        }
+        .contact-panel .header {
+            padding: 14px 18px 10px 18px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+        .contact-panel .header .title {
+            font-weight: 700;
+            font-size: 20px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+        }
+        .contact-panel .header .title .username {
+            font-weight: 400;
+            font-size: 16px;
+            color: var(--text-secondary);
+        }
+        .contact-panel .header .profile-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 17px;
+            cursor: pointer;
+            overflow: hidden;
+            background-size: cover;
+            background-position: center;
+            flex-shrink: 0;
+        }
+        .login-area {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            padding: 8px 14px 12px 14px;
+            border-bottom: 1px solid var(--border-color);
+            align-items: center;
+            flex-shrink: 0;
+        }
+        .login-area input {
+            flex: 1 1 100px;
+            min-width: 60px;
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            font-size: 14px;
+            outline: none;
+            background: var(--bg-input);
+            color: var(--text-primary);
+        }
         .login-area input:focus { border-color: var(--accent); }
-        .login-area .password-wrapper { position: relative; flex: 1 1 100px; min-width: 60px; }
-        .login-area .password-wrapper input { width: 100%; padding: 8px 12px; border: 1px solid var(--border-color); border-radius: 20px; font-size: 14px; outline: none; background: var(--bg-input); color: var(--text-primary); padding-right: 36px; }
-        .login-area .password-wrapper .toggle-password { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-secondary); cursor: pointer; font-size: 18px; padding: 0; }
-        .login-area button { flex: 0 0 auto; padding: 8px 18px; background: var(--accent); color: white; border: none; border-radius: 20px; font-weight: 600; cursor: pointer; font-size: 14px; white-space: nowrap; box-shadow: 0 2px 8px rgba(10,132,255,0.3); transition: transform 0.15s; }
+        .login-area .password-wrapper {
+            position: relative;
+            flex: 1 1 100px;
+            min-width: 60px;
+        }
+        .login-area .password-wrapper input {
+            width: 100%;
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            font-size: 14px;
+            outline: none;
+            background: var(--bg-input);
+            color: var(--text-primary);
+            padding-right: 36px;
+        }
+        .login-area .password-wrapper .toggle-password {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 18px;
+            padding: 0;
+        }
+        .login-area button {
+            flex: 0 0 auto;
+            padding: 8px 18px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+            white-space: nowrap;
+            box-shadow: 0 2px 8px rgba(10,132,255,0.3);
+            transition: transform 0.15s;
+        }
         .login-area button:active { transform: scale(0.92); }
         .login-area button:hover { background: var(--accent-hover); }
         .login-area .auth-buttons { display: flex; gap: 6px; }
-        .contact-tools { padding: 6px 14px; display: flex; gap: 6px; border-bottom: 1px solid var(--border-color); flex-shrink: 0; }
-        .contact-tools button { flex: 1; background: var(--bg-secondary); border: 1px solid var(--border-color); border-radius: 16px; padding: 6px 12px; color: var(--text-primary); font-size: 13px; cursor: pointer; transition: transform 0.15s; }
+        .contact-tools {
+            padding: 6px 14px;
+            display: flex;
+            gap: 6px;
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+        .contact-tools button {
+            flex: 1;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 6px 12px;
+            color: var(--text-primary);
+            font-size: 13px;
+            cursor: pointer;
+            transition: transform 0.15s;
+        }
         .contact-tools button:active { transform: scale(0.94); }
         .contact-tools button:hover { background: var(--bg-hover); }
-        .contact-list { flex: 1; overflow-y: auto; padding: 6px 0; }
-        .contact-item { padding: 10px 16px; cursor: pointer; display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--border-color); touch-action: manipulation; transition: background 0.15s; position: relative; }
+        .contact-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 6px 0;
+        }
+        .contact-item {
+            padding: 10px 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            border-bottom: 1px solid var(--border-color);
+            touch-action: manipulation;
+            transition: background 0.15s;
+            position: relative;
+        }
         .contact-item:hover { background: var(--bg-hover); }
         .contact-item.active { background: var(--bg-active); }
-        .contact-item .avatar { width: 44px; height: 44px; border-radius: 50%; background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 18px; flex-shrink: 0; position: relative; overflow: hidden; }
-        .contact-item .avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
-        .contact-item .avatar .initials { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: 700; color: white; background: var(--accent); }
+        .contact-item .avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 18px;
+            flex-shrink: 0;
+            position: relative;
+            overflow: hidden;
+        }
+        .contact-item .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+        .contact-item .avatar .initials {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: white;
+            background: var(--accent);
+        }
         .contact-item .avatar img ~ .initials { display: none; }
-        .contact-item .avatar .online-dot { position: absolute; bottom: 2px; right: 2px; width: 12px; height: 12px; background: var(--success); border-radius: 50%; border: 2px solid var(--bg-panel); }
+        .contact-item .avatar .online-dot {
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            width: 12px;
+            height: 12px;
+            background: var(--success);
+            border-radius: 50%;
+            border: 2px solid var(--bg-panel);
+        }
         .contact-item .info { flex: 1; min-width: 0; }
-        .contact-item .info .name { font-weight: 600; font-size: 15px; color: var(--text-primary); }
-        .contact-item .info .last-msg { font-size: 13px; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
-        .contact-item .time { font-size: 11px; color: var(--text-muted); flex-shrink: 0; align-self: flex-start; margin-top: 4px; }
-        .contact-item .unread-badge { background: var(--danger); color: white; border-radius: 50%; min-width: 20px; height: 20px; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; padding: 0 5px; position: absolute; right: 10px; top: 50%; transform: translateY(-50%); }
-        .contact-item .remove-contact { background: none; border: none; color: var(--text-muted); font-size: 16px; cursor: pointer; padding: 0 4px; transition: color 0.15s; }
+        .contact-item .info .name {
+            font-weight: 600;
+            font-size: 15px;
+            color: var(--text-primary);
+        }
+        .contact-item .info .last-msg {
+            font-size: 13px;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            margin-top: 2px;
+        }
+        .contact-item .time {
+            font-size: 11px;
+            color: var(--text-muted);
+            flex-shrink: 0;
+            align-self: flex-start;
+            margin-top: 4px;
+        }
+        .contact-item .unread-badge {
+            background: var(--danger);
+            color: white;
+            border-radius: 50%;
+            min-width: 20px;
+            height: 20px;
+            font-size: 11px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 5px;
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        .contact-item .remove-contact {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 16px;
+            cursor: pointer;
+            padding: 0 4px;
+            transition: color 0.15s;
+        }
         .contact-item .remove-contact:hover { color: var(--danger); }
 
-        .chat-panel { flex: 1; display: flex; flex-direction: column; background: var(--bg-primary); min-width: 0; height: 100%; position: relative; transition: background 0.3s; }
-        .chat-header { padding: 12px 18px; background: var(--bg-panel); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; gap: 12px; flex-shrink: 0; transition: background 0.3s; }
-        .chat-header .avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 15px; flex-shrink: 0; overflow: hidden; position: relative; }
-        .chat-header .avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
-        .chat-header .avatar .initials { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
-        .chat-header .name { font-weight: 600; font-size: 17px; color: var(--text-primary); }
-        .chat-header .status { font-size: 12px; color: var(--success); margin-left: 6px; }
-        .chat-header .header-actions { margin-left: auto; display: flex; gap: 6px; }
-        .chat-header .header-actions button { background: none; border: none; color: var(--text-secondary); font-size: 20px; cursor: pointer; padding: 4px 8px; border-radius: 8px; transition: background 0.15s; }
+        .chat-panel {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-primary);
+            min-width: 0;
+            height: 100%;
+            position: relative;
+            transition: background 0.3s;
+        }
+        .chat-header {
+            padding: 12px 18px;
+            background: var(--bg-panel);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-shrink: 0;
+            transition: background 0.3s;
+        }
+        .chat-header .avatar {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 15px;
+            flex-shrink: 0;
+            overflow: hidden;
+            position: relative;
+        }
+        .chat-header .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+        .chat-header .avatar .initials {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .chat-header .name {
+            font-weight: 600;
+            font-size: 17px;
+            color: var(--text-primary);
+        }
+        .chat-header .status {
+            font-size: 12px;
+            color: var(--success);
+            margin-left: 6px;
+        }
+        .chat-header .header-actions {
+            margin-left: auto;
+            display: flex;
+            gap: 6px;
+        }
+        .chat-header .header-actions button {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 8px;
+            transition: background 0.15s;
+        }
         .chat-header .header-actions button:hover { background: var(--bg-hover); }
 
-        .messages-area { flex: 1; overflow-y: auto; padding: 14px 18px; display: flex; flex-direction: column; gap: 8px; background: var(--bg-primary); -webkit-overflow-scrolling: touch; position: relative; }
-        .message-row { display: flex; gap: 10px; align-items: flex-start; max-width: 82%; position: relative; transition: background 0.3s; }
-        .message-row.mine { align-self: flex-end; flex-direction: row-reverse; }
-        .message-row .avatar { width: 30px; height: 30px; border-radius: 50%; background: var(--accent); color: white; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 13px; flex-shrink: 0; overflow: hidden; position: relative; cursor: pointer; }
-        .message-row .avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
-        .message-row .avatar .initials { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: 700; color: white; background: var(--accent); }
+        .messages-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 14px 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            background: var(--bg-primary);
+            -webkit-overflow-scrolling: touch;
+            position: relative;
+        }
+        .message-row {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            max-width: 82%;
+            position: relative;
+            transition: background 0.3s;
+        }
+        .message-row.mine {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+        .message-row .avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 13px;
+            flex-shrink: 0;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+        }
+        .message-row .avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50%;
+        }
+        .message-row .avatar .initials {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            color: white;
+            background: var(--accent);
+        }
         .message-row .avatar img ~ .initials { display: none; }
-        .message-row .bubble { background: var(--bubble-other); padding: 8px 14px; border-radius: 18px; word-wrap: break-word; max-width: 100%; box-shadow: 0 1px 2px var(--shadow); position: relative; color: var(--text-primary); transition: background 0.3s, color 0.3s; }
-        .message-row.mine .bubble { background: var(--bubble-mine); color: white; }
+        .message-row .bubble {
+            background: var(--bubble-other);
+            padding: 8px 14px;
+            border-radius: 18px;
+            word-wrap: break-word;
+            max-width: 100%;
+            box-shadow: 0 1px 2px var(--shadow);
+            position: relative;
+            color: var(--text-primary);
+            transition: background 0.3s, color 0.3s;
+        }
+        .message-row.mine .bubble {
+            background: var(--bubble-mine);
+            color: white;
+        }
         .message-row.mine .bubble .sender { color: rgba(255,255,255,0.7); }
-        .message-row .bubble .sender { font-weight: 600; font-size: 12px; color: var(--accent); margin-bottom: 2px; }
-        .message-row .bubble .text { font-size: 15px; line-height: 1.4; word-wrap: break-word; overflow-wrap: break-word; }
+        .message-row .bubble .sender {
+            font-weight: 600;
+            font-size: 12px;
+            color: var(--accent);
+            margin-bottom: 2px;
+        }
+        .message-row .bubble .text {
+            font-size: 15px;
+            line-height: 1.4;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
 
         /* СТАТУСЫ (ГАЛОЧКИ) */
-        .message-status { display: inline-flex; align-items: center; gap: 1px; margin-left: 4px; font-size: 14px; letter-spacing: -2px; }
-        .message-status .check { display: inline-block; font-size: 14px; line-height: 1; color: var(--text-muted); opacity: 0.6; }
-        .message-status .check.delivered { color: var(--success); opacity: 1; }
-        .message-status .check.read { color: var(--accent); opacity: 1; }
-        .message-status .check.sending { color: var(--text-muted); opacity: 0.4; animation: blink 1s infinite; }
-        @keyframes blink { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
-        .message-row.mine .bubble .time-status-wrap { display: flex; align-items: center; justify-content: flex-end; gap: 4px; margin-top: 2px; }
-        .message-row .bubble .time-status-wrap { display: flex; align-items: center; justify-content: flex-end; gap: 4px; margin-top: 2px; }
-        .message-row .bubble .time { font-size: 10px; color: var(--text-muted); }
+        .message-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 1px;
+            margin-left: 4px;
+            font-size: 14px;
+            letter-spacing: -2px;
+        }
+        .message-status .check {
+            display: inline-block;
+            font-size: 14px;
+            line-height: 1;
+            color: var(--text-muted);
+            opacity: 0.6;
+        }
+        .message-status .check.delivered {
+            color: var(--success);
+            opacity: 1;
+        }
+        .message-status .check.read {
+            color: var(--accent);
+            opacity: 1;
+        }
+        .message-status .check.sending {
+            color: var(--text-muted);
+            opacity: 0.4;
+            animation: blink 1s infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 1; }
+        }
+        .message-row.mine .bubble .time-status-wrap {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 4px;
+            margin-top: 2px;
+        }
+        .message-row .bubble .time-status-wrap {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 4px;
+            margin-top: 2px;
+        }
+        .message-row .bubble .time {
+            font-size: 10px;
+            color: var(--text-muted);
+        }
         .message-row.mine .bubble .time { color: rgba(255,255,255,0.6); }
 
-        /* TORRENT */
-        .magnet-link { color: var(--accent); text-decoration: underline; cursor: pointer; font-weight: 500; display: inline-block; padding: 4px 0; }
+        /* ФАЙЛЫ */
+        .file-link {
+            display: inline-block;
+            padding: 4px 12px;
+            background: rgba(10,132,255,0.2);
+            border-radius: 12px;
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 500;
+            border: 1px solid rgba(10,132,255,0.4);
+            cursor: pointer;
+        }
+        .message-row.mine .file-link {
+            background: rgba(255,255,255,0.2);
+            color: #fff;
+            border-color: rgba(255,255,255,0.4);
+        }
+        .torrent-info {
+            font-size: 11px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+        .magnet-link {
+            color: var(--accent);
+            text-decoration: underline;
+            cursor: pointer;
+            font-weight: 500;
+            display: inline-block;
+            padding: 4px 0;
+        }
         .message-row.mine .magnet-link { color: #fff; }
-        .torrent-info { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
 
-        .input-area { padding: 10px 14px; background: var(--bg-panel); border-top: 1px solid var(--border-color); display: flex; flex-wrap: wrap; gap: 6px; align-items: center; flex-shrink: 0; position: relative; transition: background 0.3s; }
-        .input-area .recipient { display: flex; align-items: center; gap: 4px; font-size: 13px; color: var(--text-secondary); flex: 0 0 auto; position: relative; }
-        .input-area .recipient input { width: 80px; padding: 6px 10px; border: 1px solid var(--border-color); border-radius: 20px; font-size: 13px; background: var(--bg-input); color: var(--text-primary); cursor: pointer; }
-        .input-area .recipient input:focus { border-color: var(--accent); outline: none; }
-        .input-area .recipient .dropdown { display: none; position: absolute; bottom: 100%; left: 0; background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 12px 12px 0 0; max-height: 150px; overflow-y: auto; min-width: 120px; z-index: 100; box-shadow: 0 -4px 16px var(--shadow); }
+        .input-area {
+            padding: 10px 14px;
+            background: var(--bg-panel);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            align-items: center;
+            flex-shrink: 0;
+            position: relative;
+            transition: background 0.3s;
+        }
+        .input-area .recipient {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            flex: 0 0 auto;
+            position: relative;
+        }
+        .input-area .recipient input {
+            width: 80px;
+            padding: 6px 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 20px;
+            font-size: 13px;
+            background: var(--bg-input);
+            color: var(--text-primary);
+            cursor: pointer;
+        }
+        .input-area .recipient input:focus {
+            border-color: var(--accent);
+            outline: none;
+        }
+        .input-area .recipient .dropdown {
+            display: none;
+            position: absolute;
+            bottom: 100%;
+            left: 0;
+            background: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 12px 12px 0 0;
+            max-height: 150px;
+            overflow-y: auto;
+            min-width: 120px;
+            z-index: 100;
+            box-shadow: 0 -4px 16px var(--shadow);
+        }
         .input-area .recipient .dropdown.active { display: block; }
-        .input-area .recipient .dropdown div { padding: 8px 14px; color: var(--text-primary); cursor: pointer; border-bottom: 1px solid var(--border-color); }
+        .input-area .recipient .dropdown div {
+            padding: 8px 14px;
+            color: var(--text-primary);
+            cursor: pointer;
+            border-bottom: 1px solid var(--border-color);
+        }
         .input-area .recipient .dropdown div:hover { background: var(--bg-hover); }
         .input-area .recipient .dropdown div:last-child { border-bottom: none; }
-        .input-area .message-input { flex: 1 1 120px; min-width: 60px; padding: 10px 16px; border: 1px solid var(--border-color); border-radius: 25px; outline: none; font-size: 15px; background: var(--bg-input); color: var(--text-primary); transition: background 0.3s, color 0.3s, border-color 0.3s; }
+        .input-area .message-input {
+            flex: 1 1 120px;
+            min-width: 60px;
+            padding: 10px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 25px;
+            outline: none;
+            font-size: 15px;
+            background: var(--bg-input);
+            color: var(--text-primary);
+            transition: background 0.3s, color 0.3s, border-color 0.3s;
+        }
         .input-area .message-input:focus { border-color: var(--accent); }
         .input-area .message-input:disabled { opacity: 0.4; }
-        .emoji-btn { background: none; border: none; font-size: 24px; cursor: pointer; padding: 8px; border-radius: 50%; transition: transform 0.15s, background 0.15s; touch-action: manipulation; color: var(--text-secondary); box-shadow: 0 2px 8px var(--shadow); line-height: 1; }
+
+        .emoji-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: transform 0.15s, background 0.15s;
+            touch-action: manipulation;
+            color: var(--text-secondary);
+            box-shadow: 0 2px 8px var(--shadow);
+            line-height: 1;
+        }
         .emoji-btn:active { transform: scale(0.90); }
         .emoji-btn:hover { background: var(--bg-hover); }
-        .emoji-panel { display: none; position: absolute; bottom: 100%; left: 0; right: 0; background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 16px 16px 0 0; padding: 10px 14px; max-height: 200px; overflow-y: auto; z-index: 200; box-shadow: 0 -4px 20px var(--shadow); grid-template-columns: repeat(auto-fill, minmax(40px, 1fr)); gap: 6px; justify-items: center; }
+
+        .emoji-panel {
+            display: none;
+            position: absolute;
+            bottom: 100%;
+            left: 0;
+            right: 0;
+            background: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 16px 16px 0 0;
+            padding: 10px 14px;
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 200;
+            box-shadow: 0 -4px 20px var(--shadow);
+            grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+            gap: 6px;
+            justify-items: center;
+        }
         .emoji-panel.active { display: grid; }
-        .emoji-panel span { font-size: 28px; cursor: pointer; padding: 4px; border-radius: 8px; transition: background 0.15s; text-align: center; user-select: none; width: 100%; line-height: 1.4; }
+        .emoji-panel span {
+            font-size: 28px;
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 8px;
+            transition: background 0.15s;
+            text-align: center;
+            user-select: none;
+            width: 100%;
+            line-height: 1.4;
+        }
         .emoji-panel span:hover { background: var(--bg-hover); }
         .emoji-panel span:active { transform: scale(0.9); }
-        .input-area .file-btn { background: none; border: none; font-size: 22px; cursor: pointer; padding: 8px; border-radius: 50%; transition: transform 0.15s, background 0.15s; touch-action: manipulation; color: var(--text-secondary); box-shadow: 0 2px 8px var(--shadow); }
+
+        .input-area .file-btn {
+            background: none;
+            border: none;
+            font-size: 22px;
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 50%;
+            transition: transform 0.15s, background 0.15s;
+            touch-action: manipulation;
+            color: var(--text-secondary);
+            box-shadow: 0 2px 8px var(--shadow);
+        }
         .input-area .file-btn:active { transform: scale(0.90); }
         .input-area .file-btn:hover { background: var(--bg-hover); }
-        .input-area .send-btn { background: var(--accent); border: none; border-radius: 25px; padding: 10px 22px; color: white; font-weight: 600; cursor: pointer; transition: transform 0.15s, box-shadow 0.15s; touch-action: manipulation; flex: 0 0 auto; box-shadow: 0 2px 8px rgba(10,132,255,0.3); }
+        .input-area .send-btn {
+            background: var(--accent);
+            border: none;
+            border-radius: 25px;
+            padding: 10px 22px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.15s, box-shadow 0.15s;
+            touch-action: manipulation;
+            flex: 0 0 auto;
+            box-shadow: 0 2px 8px rgba(10,132,255,0.3);
+        }
         .input-area .send-btn:active { transform: scale(0.92); }
         .input-area .send-btn:hover { background: var(--accent-hover); }
         .input-area .send-btn:disabled { opacity: 0.4; cursor: not-allowed; box-shadow: none; }
         #fileInput { display: none; }
 
-        .status-bar { text-align: center; font-size: 12px; color: var(--success); padding: 4px 0; background: var(--bg-panel); border-bottom: 1px solid var(--border-color); flex-shrink: 0; transition: background 0.3s; }
+        .status-bar {
+            text-align: center;
+            font-size: 12px;
+            color: var(--success);
+            padding: 4px 0;
+            background: var(--bg-panel);
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+            transition: background 0.3s;
+        }
         .status-bar.error { color: var(--danger); }
         .status-bar.warning { color: #ffd60a; }
 
-        .context-menu { display: none; position: fixed; background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 12px; box-shadow: 0 8px 30px var(--shadow); padding: 6px 0; z-index: 1000; min-width: 180px; }
-        .context-menu button { display: block; width: 100%; padding: 10px 20px; border: none; background: transparent; text-align: left; font-size: 14px; cursor: pointer; touch-action: manipulation; color: var(--text-primary); transition: background 0.15s; }
+        .context-menu {
+            display: none;
+            position: fixed;
+            background: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: 0 8px 30px var(--shadow);
+            padding: 6px 0;
+            z-index: 1000;
+            min-width: 180px;
+        }
+        .context-menu button {
+            display: block;
+            width: 100%;
+            padding: 10px 20px;
+            border: none;
+            background: transparent;
+            text-align: left;
+            font-size: 14px;
+            cursor: pointer;
+            touch-action: manipulation;
+            color: var(--text-primary);
+            transition: background 0.15s;
+        }
         .context-menu button:hover { background: var(--bg-hover); }
-        .context-menu .submenu { display: none; position: absolute; left: 100%; top: 0; background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 12px; min-width: 150px; padding: 6px 0; box-shadow: 0 8px 30px var(--shadow); }
+        .context-menu .submenu {
+            display: none;
+            position: absolute;
+            left: 100%;
+            top: 0;
+            background: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            min-width: 150px;
+            padding: 6px 0;
+            box-shadow: 0 8px 30px var(--shadow);
+        }
         .context-menu .submenu.active { display: block; }
-        .context-menu .submenu button { font-size: 20px; padding: 6px 14px; text-align: center; }
-        .context-menu .has-submenu { display: flex; justify-content: space-between; align-items: center; }
-        .context-menu .has-submenu::after { content: '▶'; font-size: 12px; color: var(--text-muted); }
+        .context-menu .submenu button {
+            font-size: 20px;
+            padding: 6px 14px;
+            text-align: center;
+        }
+        .context-menu .has-submenu {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .context-menu .has-submenu::after {
+            content: '▶';
+            font-size: 12px;
+            color: var(--text-muted);
+        }
 
-        .modal-overlay { display: none; position: fixed; inset: 0; background: var(--modal-bg); z-index: 2000; justify-content: center; align-items: center; }
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: var(--modal-bg);
+            z-index: 2000;
+            justify-content: center;
+            align-items: center;
+        }
         .modal-overlay.active { display: flex; }
-        .modal { background: var(--bg-panel); border-radius: 16px; padding: 24px 28px; max-width: 400px; width: 90%; box-shadow: 0 20px 60px var(--shadow); border: 1px solid var(--border-color); }
-        .modal .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .modal .modal-header h2 { font-size: 20px; color: var(--text-primary); }
-        .modal .modal-header .close-btn { background: none; border: none; font-size: 24px; color: var(--text-secondary); cursor: pointer; padding: 4px 8px; }
+        .modal {
+            background: var(--bg-panel);
+            border-radius: 16px;
+            padding: 24px 28px;
+            max-width: 400px;
+            width: 90%;
+            box-shadow: 0 20px 60px var(--shadow);
+            border: 1px solid var(--border-color);
+        }
+        .modal .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .modal .modal-header h2 {
+            font-size: 20px;
+            color: var(--text-primary);
+        }
+        .modal .modal-header .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            padding: 4px 8px;
+        }
         .modal .modal-header .close-btn:hover { color: var(--danger); }
-        .modal .setting-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border-color); }
+        .modal .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
         .modal .setting-item:last-child { border-bottom: none; }
-        .modal .setting-item .label { font-size: 15px; color: var(--text-primary); }
-        .modal .setting-item .desc { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
-        .modal .toggle-switch { position: relative; width: 48px; height: 28px; background: var(--text-muted); border-radius: 14px; cursor: pointer; transition: background 0.3s; flex-shrink: 0; }
-        .modal .toggle-switch.active { background: var(--accent); }
-        .modal .toggle-switch .slider { position: absolute; top: 2px; left: 2px; width: 24px; height: 24px; background: white; border-radius: 50%; transition: transform 0.3s; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
-        .modal .toggle-switch.active .slider { transform: translateX(20px); }
+        .modal .setting-item .label {
+            font-size: 15px;
+            color: var(--text-primary);
+        }
+        .modal .setting-item .desc {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+        .modal .toggle-switch {
+            position: relative;
+            width: 48px;
+            height: 28px;
+            background: var(--text-muted);
+            border-radius: 14px;
+            cursor: pointer;
+            transition: background 0.3s;
+            flex-shrink: 0;
+        }
+        .modal .toggle-switch.active {
+            background: var(--accent);
+        }
+        .modal .toggle-switch .slider {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            transition: transform 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .modal .toggle-switch.active .slider {
+            transform: translateX(20px);
+        }
 
-        .bottom-sheet { display: none; position: fixed; bottom: 0; left: 0; right: 0; background: var(--bg-panel); border-radius: 16px 16px 0 0; padding: 16px 20px 30px; z-index: 1001; box-shadow: 0 -8px 30px var(--shadow); transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); max-height: 60vh; overflow-y: auto; }
+        .bottom-sheet {
+            display: none;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg-panel);
+            border-radius: 16px 16px 0 0;
+            padding: 16px 20px 30px;
+            z-index: 1001;
+            box-shadow: 0 -8px 30px var(--shadow);
+            transform: translateY(100%);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            max-height: 60vh;
+            overflow-y: auto;
+        }
         .bottom-sheet.active { display: block; transform: translateY(0); }
-        .bottom-sheet .handle { width: 40px; height: 4px; background: var(--text-muted); border-radius: 2px; margin: 0 auto 16px; }
-        .bottom-sheet button { display: block; width: 100%; padding: 12px 16px; border: none; background: transparent; text-align: left; font-size: 15px; color: var(--text-primary); cursor: pointer; border-bottom: 1px solid var(--border-color); touch-action: manipulation; }
+        .bottom-sheet .handle {
+            width: 40px;
+            height: 4px;
+            background: var(--text-muted);
+            border-radius: 2px;
+            margin: 0 auto 16px;
+        }
+        .bottom-sheet button {
+            display: block;
+            width: 100%;
+            padding: 12px 16px;
+            border: none;
+            background: transparent;
+            text-align: left;
+            font-size: 15px;
+            color: var(--text-primary);
+            cursor: pointer;
+            border-bottom: 1px solid var(--border-color);
+            touch-action: manipulation;
+        }
         .bottom-sheet button:last-child { border-bottom: none; }
         .bottom-sheet button:active { background: var(--bg-hover); }
-        .bottom-sheet .cancel-btn { color: var(--danger); font-weight: 600; border-top: 1px solid var(--border-color); margin-top: 8px; padding-top: 16px; }
-        .bottom-sheet-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; }
+        .bottom-sheet .cancel-btn {
+            color: var(--danger);
+            font-weight: 600;
+            border-top: 1px solid var(--border-color);
+            margin-top: 8px;
+            padding-top: 16px;
+        }
+        .bottom-sheet-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
         .bottom-sheet-overlay.active { display: block; }
 
-        .mobile-back-btn { display: none; background: none; border: none; color: var(--accent); font-size: 24px; cursor: pointer; padding: 8px; touch-action: manipulation; }
-        .chat-header .mobile-back { display: none; background: none; border: none; color: var(--accent); font-size: 24px; cursor: pointer; padding: 4px 8px; touch-action: manipulation; }
-        .contact-panel-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 99; }
+        .mobile-back-btn {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--accent);
+            font-size: 24px;
+            cursor: pointer;
+            padding: 8px;
+            touch-action: manipulation;
+        }
+        .chat-header .mobile-back {
+            display: none;
+            background: none;
+            border: none;
+            color: var(--accent);
+            font-size: 24px;
+            cursor: pointer;
+            padding: 4px 8px;
+            touch-action: manipulation;
+        }
+        .contact-panel-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 99;
+        }
         .contact-panel-overlay.active { display: block; }
 
-        .new-messages-btn { position: absolute; bottom: 80px; right: 20px; background: var(--accent); color: white; border: none; border-radius: 30px; padding: 8px 16px; font-size: 13px; font-weight: 600; box-shadow: 0 4px 16px rgba(10,132,255,0.4); cursor: pointer; display: none; align-items: center; gap: 6px; transition: transform 0.2s; z-index: 50; touch-action: manipulation; }
+        .new-messages-btn {
+            position: absolute;
+            bottom: 80px;
+            right: 20px;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            box-shadow: 0 4px 16px rgba(10,132,255,0.4);
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            gap: 6px;
+            transition: transform 0.2s;
+            z-index: 50;
+            touch-action: manipulation;
+        }
         .new-messages-btn:active { transform: scale(0.92); }
-        .new-messages-btn .count { background: rgba(255,255,255,0.2); border-radius: 50%; padding: 0 8px; font-size: 12px; }
+        .new-messages-btn .count {
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            padding: 0 8px;
+            font-size: 12px;
+        }
 
-        .typing-indicator { padding: 6px 18px; font-size: 13px; color: var(--text-secondary); font-style: italic; min-height: 28px; display: flex; align-items: center; gap: 6px; flex-shrink: 0; background: var(--bg-primary); border-top: 1px solid var(--border-color); transition: background 0.3s; }
-        .typing-indicator .dots { display: inline-flex; gap: 3px; }
-        .typing-indicator .dots span { width: 5px; height: 5px; background: var(--text-secondary); border-radius: 50%; animation: typingDot 1.4s infinite; }
+        .typing-indicator {
+            padding: 6px 18px;
+            font-size: 13px;
+            color: var(--text-secondary);
+            font-style: italic;
+            min-height: 28px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-shrink: 0;
+            background: var(--bg-primary);
+            border-top: 1px solid var(--border-color);
+            transition: background 0.3s;
+        }
+        .typing-indicator .dots {
+            display: inline-flex;
+            gap: 3px;
+        }
+        .typing-indicator .dots span {
+            width: 5px;
+            height: 5px;
+            background: var(--text-secondary);
+            border-radius: 50%;
+            animation: typingDot 1.4s infinite;
+        }
         .typing-indicator .dots span:nth-child(2) { animation-delay: 0.2s; }
         .typing-indicator .dots span:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes typingDot { 0%, 60%, 100% { transform: translateY(0); opacity: 0.3; } 30% { transform: translateY(-6px); opacity: 1; } }
+        @keyframes typingDot {
+            0%, 60%, 100% { transform: translateY(0); opacity: 0.3; }
+            30% { transform: translateY(-6px); opacity: 1; }
+        }
 
         @media (max-width: 768px) {
-            .contact-panel { position: fixed; left: 0; top: 0; width: 85%; max-width: 320px; height: 100%; transform: translateX(-100%); z-index: 100; border-right: 1px solid var(--border-color); }
+            .contact-panel {
+                position: fixed;
+                left: 0;
+                top: 0;
+                width: 85%;
+                max-width: 320px;
+                height: 100%;
+                transform: translateX(-100%);
+                z-index: 100;
+                border-right: 1px solid var(--border-color);
+            }
             .contact-panel.open { transform: translateX(0); }
             .contact-panel .header .mobile-back-btn { display: block; }
             .chat-panel { width: 100%; }
             .chat-header .mobile-back { display: block; }
-            .contact-panel-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 99; }
+            .contact-panel-overlay {
+                display: none;
+                position: fixed;
+                inset: 0;
+                background: rgba(0,0,0,0.5);
+                z-index: 99;
+            }
             .contact-panel-overlay.active { display: block; }
             .messages-area { padding: 10px 14px; }
             .message-row { max-width: 90%; }
@@ -286,7 +1121,7 @@
             <button class="emoji-btn" id="emojiBtn">😊</button>
             <div class="emoji-panel" id="emojiPanel"></div>
             <input type="text" class="message-input" id="messageInput" placeholder="Написать сообщение..." disabled>
-            <button class="file-btn" id="fileBtn" title="Отправить файл через торрент">📎</button>
+            <button class="file-btn" id="fileBtn" title="Отправить файл">📎</button>
             <button class="send-btn" id="sendBtn" disabled>Отправить</button>
         </div>
         <input type="file" id="fileInput" accept="*/*">
@@ -322,6 +1157,41 @@ const db = firebase.database();
 const messagesRef = db.ref('messages');
 const usersRef = db.ref('users');
 const typingRef = db.ref('typing');
+
+// ============================================================
+// GOFILE.IO
+// ============================================================
+const GOFILE_TOKEN = 'Dxxgnt9oxqpiyDsgUKvTrRhskB3DShSy';
+
+async function uploadToGoFile(file) {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    try {
+        const response = await fetch('https://store1.gofile.io/uploadFile', {
+            method: 'POST',
+            headers: {
+                'Authorization': 'Bearer ' + GOFILE_TOKEN
+            },
+            body: formData
+        });
+        
+        if (!response.ok) {
+            throw new Error('Ошибка загрузки: ' + response.status);
+        }
+        
+        const data = await response.json();
+        
+        if (data.status !== 'ok') {
+            throw new Error('Ошибка: ' + (data.message || 'Неизвестная ошибка'));
+        }
+        
+        return data.data.downloadPage;
+    } catch (err) {
+        console.error('Upload error:', err);
+        throw err;
+    }
+}
 
 // ============================================================
 // WEBTORRENT
@@ -861,9 +1731,9 @@ function markAsRead(key) {
 }
 
 // ============================================================
-// TORRENT
+// ФАЙЛЫ (GoFile.io)
 // ============================================================
-function shareFileViaTorrent(file) {
+function shareFile(file) {
     if (!currentUser) {
         alert('Войдите в систему');
         return;
@@ -871,49 +1741,44 @@ function shareFileViaTorrent(file) {
     
     const to = recipientInput.value.trim() || null;
     
-    if (!webtorrentClient) webtorrentClient = initWebTorrent();
-    if (!webtorrentClient) {
-        alert('Не удалось инициализировать WebTorrent');
-        return;
-    }
-    
-    addSystemMessage('📤 Начинаем раздачу файла "' + file.name + '" через торрент...');
+    addSystemMessage('📤 Загружаем файл "' + file.name + '" на сервер...');
     fileBtn.style.opacity = '0.5';
     fileBtn.disabled = true;
     
-    try {
-        webtorrentClient.seed(file, (torrent) => {
-            const magnetURI = torrent.magnetURI;
+    uploadToGoFile(file)
+        .then((fileUrl) => {
+            addSystemMessage('✅ Файл загружен на GoFile.io!');
             
             const payload = {
                 name: currentName,
-                text: magnetURI,
-                torrentName: file.name,
-                torrentSize: file.size,
-                isTorrent: true,
+                text: fileUrl,
+                fileName: file.name,
+                fileSize: file.size,
+                isFile: true,
                 to: to,
                 timestamp: firebase.database.ServerValue.TIMESTAMP,
                 status: 'sending'
             };
-            
             messagesRef.push(payload);
             
-            addSystemMessage('📤 Файл "' + file.name + '" начал раздаваться. Magnet-ссылка отправлена в чат!');
+            addSystemMessage('📎 Ссылка на файл отправлена в чат!');
+            
+            // Копируем ссылку
+            navigator.clipboard.writeText(fileUrl).catch(() => {});
+            
             fileBtn.style.opacity = '1';
             fileBtn.disabled = false;
-            
-            if (confirm('Файл начал раздаваться. Скопировать Magnet-ссылку в буфер обмена?')) {
-                navigator.clipboard.writeText(magnetURI).catch(() => {});
-            }
+        })
+        .catch((err) => {
+            addSystemMessage('❌ Ошибка загрузки: ' + err.message);
+            fileBtn.style.opacity = '1';
+            fileBtn.disabled = false;
         });
-    } catch(err) {
-        console.error('Torrent error:', err);
-        addSystemMessage('❌ Ошибка создания торрента: ' + err.message);
-        fileBtn.style.opacity = '1';
-        fileBtn.disabled = false;
-    }
 }
 
+// ============================================================
+// ТОРРЕНТ
+// ============================================================
 function downloadViaWebTorrent(magnetURI, fileName) {
     if (!webtorrentClient) webtorrentClient = initWebTorrent();
     if (!webtorrentClient) {
@@ -921,7 +1786,6 @@ function downloadViaWebTorrent(magnetURI, fileName) {
         return;
     }
     
-    // ==== ПРОВЕРКА НА ДУБЛИКАТ ====
     const existing = webtorrentClient.torrents.find(t => t.magnetURI === magnetURI);
     if (existing) {
         const file = existing.files[0];
@@ -953,11 +1817,11 @@ function downloadViaWebTorrent(magnetURI, fileName) {
             activeTorrents[magnetURI] = torrent;
             
             const file = torrent.files[0];
-            addSystemMessage('📥 Файл "' + file.name + '" начал загружаться. Размер: ' + (file.length / 1024 / 1024).toFixed(2) + ' MB');
+            addSystemMessage('📥 Файл "' + file.name + '" найден. Размер: ' + (file.length / 1024 / 1024).toFixed(2) + ' MB');
             
             file.getBlob((err, blob) => {
                 if (err) {
-                    addSystemMessage('❌ Ошибка загрузки файла: ' + err.message);
+                    addSystemMessage('❌ Ошибка загрузки: ' + err.message);
                     delete activeTorrents[magnetURI];
                     return;
                 }
@@ -994,7 +1858,7 @@ function addSystemMessage(text) {
 }
 
 // ============================================================
-// ФАЙЛЫ
+// ФАЙЛЫ (обработчики)
 // ============================================================
 fileBtn.addEventListener('click', () => {
     if (!currentUser) {
@@ -1012,7 +1876,7 @@ fileInput.onchange = (e) => {
             fileInput.value = '';
             return;
         }
-        shareFileViaTorrent(file);
+        shareFile(file);
         fileInput.value = '';
     }
 };
@@ -1067,7 +1931,8 @@ function listenMessages() {
             if (notificationsEnabled) {
                 const title = '📩 ' + (data.name || 'Аноним');
                 let body = data.text || '';
-                if (data.isTorrent) body = '📎 Торрент файл';
+                if (data.isFile) body = '📎 Файл';
+                if (data.isTorrent) body = '📎 Торрент';
                 if (!body) body = 'Новое сообщение';
                 showNotification(title, body);
             }
@@ -1141,7 +2006,7 @@ function addMessageToUI(key, data) {
                     }
                 }
                 if (!contacts[contactId]) contacts[contactId] = {};
-                contacts[contactId].lastMsg = data.text || (data.isTorrent ? '📎 Торрент' : '');
+                contacts[contactId].lastMsg = data.text || (data.isFile ? '📎 Файл' : (data.isTorrent ? '📎 Торрент' : ''));
                 contacts[contactId].timestamp = data.timestamp || 0;
                 renderContacts();
             }
@@ -1195,7 +2060,44 @@ function createMessageRow(key, data) {
     const textDiv = document.createElement('div');
     textDiv.className = 'text';
     
-    if (data.isTorrent && data.text && data.text.startsWith('magnet:?')) {
+    // ФАЙЛ (GoFile.io)
+    if (data.isFile && data.text) {
+        const link = document.createElement('a');
+        link.href = data.text;
+        link.target = '_blank';
+        link.className = 'file-link';
+        link.textContent = '📎 Скачать "' + (data.fileName || 'файл') + '"';
+        textDiv.appendChild(link);
+        
+        if (data.fileSize) {
+            const info = document.createElement('div');
+            info.className = 'torrent-info';
+            info.textContent = 'Размер: ' + (data.fileSize / 1024 / 1024).toFixed(2) + ' MB';
+            textDiv.appendChild(info);
+        }
+        
+        // Кнопка копирования
+        const copyBtn = document.createElement('button');
+        copyBtn.textContent = '📋 Копировать ссылку';
+        copyBtn.style.cssText = 'display:block;margin-top:4px;background:var(--accent);color:white;border:none;border-radius:12px;padding:2px 10px;font-size:12px;cursor:pointer;';
+        copyBtn.onclick = (e) => {
+            e.stopPropagation();
+            navigator.clipboard.writeText(data.text).then(() => {
+                alert('Ссылка скопирована!');
+            }).catch(() => {
+                const textarea = document.createElement('textarea');
+                textarea.value = data.text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                alert('Ссылка скопирована!');
+            });
+        };
+        textDiv.appendChild(copyBtn);
+    }
+    // ТОРРЕНТ
+    else if (data.isTorrent && data.text && data.text.startsWith('magnet:?')) {
         const link = document.createElement('span');
         link.className = 'magnet-link';
         link.textContent = '📥 Скачать "' + (data.torrentName || 'файл') + '" через торрент';
@@ -1216,7 +2118,7 @@ function createMessageRow(key, data) {
         copyBtn.style.cssText = 'display:block;margin-top:4px;background:var(--accent);color:white;border:none;border-radius:12px;padding:2px 10px;font-size:12px;cursor:pointer;';
         copyBtn.onclick = (e) => {
             e.stopPropagation();
-            navigator.clipboard?.writeText(data.text).then(() => {
+            navigator.clipboard.writeText(data.text).then(() => {
                 alert('Magnet-ссылка скопирована!');
             }).catch(() => {
                 const textarea = document.createElement('textarea');
@@ -1229,7 +2131,9 @@ function createMessageRow(key, data) {
             });
         };
         textDiv.appendChild(copyBtn);
-    } else if (data.text) {
+    }
+    // ТЕКСТ
+    else if (data.text) {
         const lines = data.text.split('\n');
         lines.forEach((line, i) => {
             if (i > 0) textDiv.appendChild(document.createElement('br'));
@@ -1534,14 +2438,14 @@ function updateContactsFromCache() {
         const contactId = item.to && item.to !== currentName ? item.to : (item.name !== currentName ? item.name : null);
         if (contactId) {
             if (!newContacts[contactId]) newContacts[contactId] = { lastMsg: '', time: '', timestamp: 0 };
-            newContacts[contactId].lastMsg = item.text || (item.isTorrent ? '📎 Торрент' : '');
+            newContacts[contactId].lastMsg = item.text || (item.isFile ? '📎 Файл' : (item.isTorrent ? '📎 Торрент' : ''));
             const ts = item.timestamp || 0;
             newContacts[contactId].time = ts ? new Date(ts).toLocaleTimeString() : '';
             newContacts[contactId].timestamp = ts;
         }
         if (!item.to) {
             if (!newContacts['all']) newContacts['all'] = { lastMsg: '', time: '', timestamp: 0 };
-            newContacts['all'].lastMsg = item.text || (item.isTorrent ? '📎 Торрент' : '');
+            newContacts['all'].lastMsg = item.text || (item.isFile ? '📎 Файл' : (item.isTorrent ? '📎 Торрент' : ''));
             const ts = item.timestamp || 0;
             newContacts['all'].time = ts ? new Date(ts).toLocaleTimeString() : '';
             newContacts['all'].timestamp = ts;
@@ -1949,7 +2853,7 @@ myAvatar.addEventListener('dblclick', () => {
     }
 });
 
-console.log('🚀 ICQ-чат загружен! Торрент + статусы сообщений');
+console.log('🚀 ICQ-чат загружен! GoFile.io + статусы сообщений');
 console.log('📱 Добавьте страницу на рабочий стол через браузер');
 </script>
 </body>
