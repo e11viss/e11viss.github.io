@@ -10,7 +10,6 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://unpkg.com/peerjs@1.5.1/dist/peerjs.min.js"></script>
     <style>
         /* ===== RESET & BASE ===== */
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -47,7 +46,6 @@
             --modal-bg: rgba(0,0,0,0.7);
             --tab-bg: #1f1f23;
             --skeleton-bg: #2c2c30;
-            --skeleton-shine: #3a3a44;
         }
         [data-theme="light"] {
             --bg-primary: #f0f0f2;
@@ -69,7 +67,6 @@
             --modal-bg: rgba(0,0,0,0.5);
             --tab-bg: #f0f0f2;
             --skeleton-bg: #e5e5ea;
-            --skeleton-shine: #d1d1d6;
         }
 
         /* ===== APP LAYOUT ===== */
@@ -123,21 +120,6 @@
             font-weight: 400;
             font-size: 14px;
             color: var(--text-secondary);
-        }
-        .top-bar .search-btn {
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            font-size: 20px;
-            cursor: pointer;
-            padding: 6px 8px;
-            border-radius: 8px;
-            min-height: 44px;
-            min-width: 44px;
-        }
-        .top-bar .search-btn:hover {
-            background: var(--bg-hover);
-            color: var(--text-primary);
         }
         .top-bar .shortcuts-hint {
             font-size: 11px;
@@ -1426,16 +1408,6 @@
             color: var(--text-primary);
         }
         .call-container .call-actions .call-video:hover { background: var(--bg-active); }
-        .call-container .call-actions .call-answer {
-            background: var(--success);
-            color: #fff;
-        }
-        .call-container .call-actions .call-answer:hover { transform: scale(1.05); }
-        .call-container .call-actions .call-decline {
-            background: var(--danger);
-            color: #fff;
-        }
-        .call-container .call-actions .call-decline:hover { transform: scale(1.05); }
         .call-container video {
             width: 100%;
             max-height: 300px;
@@ -1473,7 +1445,6 @@
             .bottom-tab-bar { display: flex; }
             .chat-panel .messages-area .message-row { max-width: 90%; }
             .top-bar .shortcuts-hint { display: none !important; }
-            .chat-list-panel .search-bar .create-group-btn { font-size: 11px; padding: 4px 8px; }
         }
         @media (max-width: 400px) {
             .chat-list-panel { width: 100%; max-width: none; }
@@ -1493,7 +1464,6 @@
         <div class="profile-icon" id="myAvatar">Г</div>
         <div class="app-title">ICQ <span id="headerUsername">—</span></div>
         <span class="shortcuts-hint">⌘K — поиск · Esc — закрыть</span>
-        <button class="search-btn" id="searchBtn">🔍</button>
     </div>
 
     <!-- MAIN CONTENT -->
@@ -1687,20 +1657,7 @@ async function uploadToGoFile(file) {
 
 function downloadFile(url, fileName) {
     if (!url) { alert('Ссылка на файл не найдена'); return; }
-    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-    if (isMobile) { window.open(url, '_blank'); }
-    else {
-        fetch(url).then(r => r.blob()).then(blob => {
-            const blobUrl = URL.createObjectURL(blob);
-            const link = document.createElement('a');
-            link.href = blobUrl;
-            link.download = fileName || 'file';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
-        }).catch(() => window.open(url, '_blank'));
-    }
+    window.open(url, '_blank');
 }
 
 // ============================================================
@@ -1740,7 +1697,6 @@ const $ = id => document.getElementById(id);
 const myAvatar = $('myAvatar');
 const headerUsername = $('headerUsername');
 const searchInput = $('searchInput');
-const searchBtn = $('searchBtn');
 const chatList = $('chatList');
 const chatListPanel = $('chatListPanel');
 const chatListOverlay = $('chatListOverlay');
@@ -1755,7 +1711,6 @@ const sendBtn = $('sendBtn');
 const fileBtn = $('fileBtn');
 const fileInput = $('fileInput');
 const voiceBtn = $('voiceBtn');
-const voiceInput = $('voiceInput');
 const emojiBtn = $('emojiBtn');
 const emojiPanel = $('emojiPanel');
 const settingsBtn = $('settingsBtn');
@@ -1853,25 +1808,6 @@ function updateHeaderAvatar() {
 }
 
 // ============================================================
-// УВЕДОМЛЕНИЯ
-// ============================================================
-function loadSettings() {
-    const val = localStorage.getItem('notificationsEnabled');
-    notificationsEnabled = val !== null ? val === 'true' : true;
-}
-loadSettings();
-
-function showNotification(title, body) {
-    if (!notificationsEnabled) return;
-    if (!("Notification" in window) || Notification.permission !== "granted") return;
-    try {
-        const notification = new Notification(title, { body: body, icon: '💬' });
-        notification.onclick = () => { window.focus(); notification.close(); };
-        setTimeout(() => notification.close(), 15000);
-    } catch(e) {}
-}
-
-// ============================================================
 // СТАТУСЫ СООБЩЕНИЙ
 // ============================================================
 function getStatusHTML(status) {
@@ -1892,14 +1828,6 @@ function updateMessageStatus(key, status) {
     if (statusEl) statusEl.innerHTML = getStatusHTML(status);
     const msg = messagesCache.find(m => m.key === key);
     if (msg) msg.status = status;
-}
-
-function markAsRead(key) {
-    const msg = messagesCache.find(m => m.key === key);
-    if (!msg) return;
-    if (msg.status !== 'read') {
-        messagesRef.child(key).update({ status: 'read' });
-    }
 }
 
 // ============================================================
@@ -1972,7 +1900,7 @@ document.addEventListener('click', (e) => {
 });
 
 // ============================================================
-// РЕАКЦИИ (попап)
+// РЕАКЦИИ
 // ============================================================
 function showReactionPopup(key, data, event) {
     const existingPopup = document.querySelector('.reaction-popup');
@@ -1980,8 +1908,8 @@ function showReactionPopup(key, data, event) {
     
     const popup = document.createElement('div');
     popup.className = 'reaction-popup active';
-    popup.style.top = (event.clientY - 60) + 'px';
-    popup.style.left = (event.clientX - 100) + 'px';
+    popup.style.top = Math.min(event.clientY - 60, window.innerHeight - 200) + 'px';
+    popup.style.left = Math.min(event.clientX - 100, window.innerWidth - 220) + 'px';
     
     const reactions = ['❤️', '😂', '😮', '😢', '🔥', '👍', '👎', '🎉', '😍'];
     reactions.forEach(emoji => {
@@ -2014,6 +1942,31 @@ function showReactionPopup(key, data, event) {
     }, 100);
 }
 
+function toggleReaction(key, emoji) {
+    const msgData = messagesCache.find(m => m.key === key);
+    if (!msgData) return;
+    const ref = messagesRef.child(key);
+    ref.once('value', (snap) => {
+        const data = snap.val() || {};
+        if (!data.reactions) data.reactions = {};
+        const usersKey = emoji + '_users';
+        if (!data.reactions[usersKey]) data.reactions[usersKey] = [];
+        const idx = data.reactions[usersKey].indexOf(currentUserId);
+        if (idx !== -1) {
+            data.reactions[usersKey].splice(idx, 1);
+            data.reactions[emoji] = (data.reactions[emoji] || 1) - 1;
+            if (data.reactions[emoji] <= 0) {
+                delete data.reactions[emoji];
+                delete data.reactions[usersKey];
+            }
+        } else {
+            data.reactions[usersKey].push(currentUserId);
+            data.reactions[emoji] = (data.reactions[emoji] || 0) + 1;
+        }
+        ref.update({ reactions: data.reactions });
+    });
+}
+
 // ============================================================
 // ГОЛОСОВЫЕ СООБЩЕНИЯ
 // ============================================================
@@ -2038,8 +1991,8 @@ async function startRecording() {
             audioChunks.push(event.data);
         };
         mediaRecorder.onstop = () => {
-            const audioBlob = new Blob(audioChunks, { type: 'audio/ogg' });
-            const file = new File([audioBlob], 'voice.ogg', { type: 'audio/ogg' });
+            const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
+            const file = new File([audioBlob], 'voice.webm', { type: 'audio/webm' });
             sendVoiceMessage(file);
             stream.getTracks().forEach(track => track.stop());
         };
@@ -2068,7 +2021,7 @@ async function sendVoiceMessage(file) {
     try {
         const result = await uploadToGoFile(file);
         const to = currentContact === 'all' ? null : currentContact;
-        const ref = messagesRef.push({
+        messagesRef.push({
             name: currentName,
             userId: currentUserId,
             text: result.directLink,
@@ -2147,7 +2100,7 @@ function createVoiceMessageElement(data) {
             playBtn.dataset.playing = 'false';
         } else {
             audio.playbackRate = playSpeed;
-            audio.play();
+            audio.play().catch(() => {});
             isPlaying = true;
             playBtn.textContent = '⏸';
             playBtn.dataset.playing = 'true';
@@ -2261,9 +2214,6 @@ function generateSmartReplies(context) {
     }
     if (lower.includes('пока') || lower.includes('до свидания')) {
         replies.push('Пока! 👋', 'До встречи!', 'Всего хорошего!');
-    }
-    if (lower.includes('смешно') || lower.includes('хаха')) {
-        replies.push('😂', '👍', '🤣');
     }
     if (lower.includes('?')) {
         replies.push('Да', 'Нет', 'Не знаю 🤔', 'А ты как думаешь?');
@@ -2434,31 +2384,6 @@ function hideContextMenu() {
 }
 
 contextOverlay.addEventListener('click', hideContextMenu);
-
-function toggleReaction(key, emoji) {
-    const msgData = messagesCache.find(m => m.key === key);
-    if (!msgData) return;
-    const ref = messagesRef.child(key);
-    ref.once('value', (snap) => {
-        const data = snap.val() || {};
-        if (!data.reactions) data.reactions = {};
-        const usersKey = emoji + '_users';
-        if (!data.reactions[usersKey]) data.reactions[usersKey] = [];
-        const idx = data.reactions[usersKey].indexOf(currentUserId);
-        if (idx !== -1) {
-            data.reactions[usersKey].splice(idx, 1);
-            data.reactions[emoji] = (data.reactions[emoji] || 1) - 1;
-            if (data.reactions[emoji] <= 0) {
-                delete data.reactions[emoji];
-                delete data.reactions[usersKey];
-            }
-        } else {
-            data.reactions[usersKey].push(currentUserId);
-            data.reactions[emoji] = (data.reactions[emoji] || 0) + 1;
-        }
-        ref.update({ reactions: data.reactions });
-    });
-}
 
 function handleContextAction(action, key) {
     const msgData = messagesCache.find(m => m.key === key);
@@ -2736,10 +2661,7 @@ function createChatItem(id, displayName, lastMsg, time, isGroup = false) {
     if (!isGroup && id !== 'all') div.dataset.userId = id;
     
     let avatarUrl = null;
-    let avatarEmoji = null;
-    if (isGroup) {
-        avatarEmoji = '👥';
-    } else if (id !== 'all') {
+    if (!isGroup && id !== 'all') {
         avatarUrl = getAvatarUrl(id);
     }
     const avatar = createAvatarElement(displayName, avatarUrl, 44);
@@ -2799,24 +2721,6 @@ function createChatItem(id, displayName, lastMsg, time, isGroup = false) {
         }
         if (window.innerWidth <= 768) closeChatList();
     };
-    
-    div.addEventListener('contextmenu', (e) => {
-        e.preventDefault();
-        if (id === 'all' || isGroup) return;
-        if (confirm('Очистить всю историю с ' + displayName + '?')) {
-            const toRemove = [];
-            messagesCache.forEach(item => {
-                if (item.name === id || item.to === id || (item.name === currentName && item.to === id)) {
-                    toRemove.push(item.key);
-                }
-            });
-            toRemove.forEach(key => messagesRef.child(key).remove());
-            delete contacts[id];
-            unreadCounts[id] = 0;
-            renderChatList();
-            if (currentContact === id) switchContact('all');
-        }
-    });
     
     return div;
 }
@@ -2937,33 +2841,7 @@ function listenMessages() {
         const data = snapshot.val();
         const key = snapshot.key;
         if (messagesCache.some(m => m.key === key) || messageNodes[key]) return;
-        
-        if (data.name !== currentName && (data.to === currentName || !data.to)) {
-            const msgKey = key || Date.now();
-            if (msgKey !== lastNotifiedMessageCount) {
-                lastNotifiedMessageCount = msgKey;
-                const title = '💬 ' + (data.name || 'Аноним');
-                let body = data.text || '';
-                if (data.isFile) body = '📎 Файл';
-                if (data.isVoice) body = '🎤 Голосовое сообщение';
-                if (!body) body = 'Новое сообщение';
-                showNotification(title, body);
-            }
-        }
-        
         addMessageToUI(key, data);
-        if (!isAtBottom && data.name !== currentName) {
-            newMessagesCountVal++;
-            updateNewMessagesBtn();
-        }
-        if (data.name !== currentName && (data.to === currentName || !data.to)) {
-            markAsRead(key);
-            if (document.hidden || document.visibilityState === 'hidden') {
-                unreadTotal++;
-                updateBadge();
-                startBlinking();
-            }
-        }
         if (data.name !== currentName) {
             lastMessageForReplies = data;
             setTimeout(() => showSmartReplies(data), 500);
@@ -3026,10 +2904,6 @@ function addMessageToUI(key, data) {
                 if (currentContact !== contactId && data.to !== currentName) {
                     unreadCounts[contactId]++;
                     renderChatList();
-                    if (document.hidden || document.visibilityState === 'hidden') {
-                        unreadTotal++;
-                        updateBadge();
-                    }
                 }
                 if (!contacts[contactId]) contacts[contactId] = {};
                 contacts[contactId].lastMsg = data.text || (data.isFile ? '📎 Файл' : '');
@@ -3101,15 +2975,6 @@ function createMessageRow(key, data) {
             info.textContent = 'Размер: ' + (data.fileSize / 1024 / 1024).toFixed(2) + ' MB';
             textDiv.appendChild(info);
         }
-        const copyBtn = document.createElement('button');
-        copyBtn.className = 'copy-btn';
-        copyBtn.textContent = '📋 Копировать ссылку';
-        copyBtn.onclick = (e) => {
-            e.stopPropagation();
-            navigator.clipboard.writeText(data.text).then(() => alert('Ссылка скопирована!'))
-                .catch(() => { const ta = document.createElement('textarea'); ta.value = data.text; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta); alert('Ссылка скопирована!'); });
-        };
-        textDiv.appendChild(copyBtn);
     } else if (data.text) {
         data.text.split('\n').forEach((line, i) => {
             if (i > 0) textDiv.appendChild(document.createElement('br'));
@@ -3191,7 +3056,9 @@ function createMessageRow(key, data) {
 function markAllAsRead() {
     messagesCache.forEach(msg => {
         if (msg.name !== currentName && (msg.to === currentName || !msg.to)) {
-            if (msg.status !== 'read') markAsRead(msg.key);
+            if (msg.status !== 'read') {
+                messagesRef.child(msg.key).update({ status: 'read' });
+            }
         }
     });
 }
@@ -3226,29 +3093,26 @@ function sendMessage(text) {
     if (!currentUser || !currentName || !currentUserId) return;
     
     if (currentGroupId) {
-        // Групповое сообщение
-        const payload = {
+        groupMessagesRef.child(currentGroupId).push({
             name: currentName,
             userId: currentUserId,
             text: text || '',
             timestamp: firebase.database.ServerValue.TIMESTAMP,
             status: 'sending'
-        };
-        groupMessagesRef.child(currentGroupId).push(payload);
+        });
         clearTypingStatus();
         return;
     }
     
     const to = currentContact === 'all' ? null : currentContact;
-    const payload = {
+    const newRef = messagesRef.push({
         name: currentName,
         userId: currentUserId,
         text: text || '',
         to: to,
         timestamp: firebase.database.ServerValue.TIMESTAMP,
         status: 'sending'
-    };
-    const newRef = messagesRef.push(payload);
+    });
     processLinks(text, newRef.key);
     clearTypingStatus();
 }
@@ -3263,13 +3127,6 @@ function sendText() {
 sendBtn.onclick = sendText;
 messageInput.onkeydown = (e) => {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendText(); }
-    if (e.key === 'Enter' && e.ctrlKey) {
-        e.preventDefault();
-        const start = messageInput.selectionStart;
-        const end = messageInput.selectionEnd;
-        messageInput.value = messageInput.value.substring(0, start) + '\n' + messageInput.value.substring(end);
-        messageInput.selectionStart = messageInput.selectionEnd = start + 1;
-    }
 };
 
 // ============================================================
@@ -3395,20 +3252,11 @@ function startBlinking() {
     blinkInterval = setInterval(() => {
         show = !show;
         document.title = show ? '🔴 ICQ-чат' : 'ICQ-чат';
-        const link = document.querySelector('link[rel="icon"]');
-        if (link) {
-            link.href = show ? 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🔴</text></svg>' : 
-                               'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">💬</text></svg>';
-        }
     }, 800);
 }
 function stopBlinking() {
     if (blinkInterval) { clearInterval(blinkInterval); blinkInterval = null; }
     document.title = 'ICQ-чат';
-    const link = document.querySelector('link[rel="icon"]');
-    if (link) {
-        link.href = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">💬</text></svg>';
-    }
 }
 
 // ============================================================
@@ -3512,13 +3360,6 @@ document.addEventListener('keydown', (e) => {
             switchContact('all');
         }
     }
-    if (e.ctrlKey && e.key === 'Enter' && document.activeElement === messageInput) {
-        e.preventDefault();
-        const start = messageInput.selectionStart;
-        const end = messageInput.selectionEnd;
-        messageInput.value = messageInput.value.substring(0, start) + '\n' + messageInput.value.substring(end);
-        messageInput.selectionStart = messageInput.selectionEnd = start + 1;
-    }
 });
 
 // ============================================================
@@ -3583,20 +3424,10 @@ function generateSettingsHTML(avatarUrl) {
                 <div class="slider" style="transform:${currentTheme === 'dark' ? 'translateX(20px)' : 'translateX(0)'};"></div>
             </div>
         </div>
-        <div class="setting-item">
-            <div>
-                <div class="label">Уведомления</div>
-                <div class="desc">Показывать уведомления</div>
-            </div>
-            <div class="toggle-switch ${notificationsEnabled ? 'active' : ''}" id="notifyToggle">
-                <div class="slider" style="transform:${notificationsEnabled ? 'translateX(20px)' : 'translateX(0)'};"></div>
-            </div>
-        </div>
         <div class="setting-item" style="flex-direction:column;align-items:stretch;">
             <div class="label">Горячие клавиши</div>
             <div class="shortcuts-list">
                 <div class="shortcut-item"><span>Отправить</span><span class="key">Enter</span></div>
-                <div class="shortcut-item"><span>Новая строка</span><span class="key">Ctrl+Enter</span></div>
                 <div class="shortcut-item"><span>Поиск</span><span class="key">Ctrl+F</span></div>
                 <div class="shortcut-item"><span>Закрыть</span><span class="key">Esc</span></div>
             </div>
@@ -3618,16 +3449,6 @@ function setupSettingsHandlers() {
             slider.style.transform = currentTheme === 'dark' ? 'translateX(20px)' : 'translateX(0)';
         });
     }
-    const notifyToggle = document.getElementById('notifyToggle');
-    if (notifyToggle) {
-        notifyToggle.addEventListener('click', () => {
-            notificationsEnabled = !notificationsEnabled;
-            localStorage.setItem('notificationsEnabled', String(notificationsEnabled));
-            notifyToggle.classList.toggle('active');
-            const slider = notifyToggle.querySelector('.slider');
-            slider.style.transform = notificationsEnabled ? 'translateX(20px)' : 'translateX(0)';
-        });
-    }
     const changeNameBtn = document.getElementById('changeNameBtn');
     if (changeNameBtn) {
         changeNameBtn.addEventListener('click', () => {
@@ -3635,9 +3456,7 @@ function setupSettingsHandlers() {
             if (newName && newName.trim()) {
                 const trimmed = newName.trim();
                 usersRef.child(currentUser.uid).update({ name: trimmed });
-                const oldName = currentName;
                 currentName = trimmed;
-                if (avatarCache[oldName]) { avatarCache[trimmed] = avatarCache[oldName]; delete avatarCache[oldName]; }
                 updateHeaderAvatar();
                 headerUsername.textContent = currentName;
                 closeModal();
@@ -3749,12 +3568,6 @@ function showContactsModal() {
         const val = document.getElementById('searchContactInput').value.trim();
         if (val) findUserById(val);
     });
-    document.getElementById('searchContactInput')?.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            const val = e.target.value.trim();
-            if (val) findUserById(val);
-        }
-    });
 }
 
 settingsBtn.addEventListener('click', () => {
@@ -3779,269 +3592,6 @@ chatBackBtn.addEventListener('click', () => {
     if (window.innerWidth <= 768) openChatList();
 });
 chatListOverlay.addEventListener('click', closeChatList);
-
-// ============================================================
-// WEBRTC ЗВОНКИ (улучшенная версия)
-// ============================================================
-let peer = null;
-let currentCall = null;
-let localStream = null;
-let remoteStream = null;
-let peerInitialized = false;
-let peerReconnectTimer = null;
-
-function initPeer() {
-    if (!currentUserId) return;
-    if (peerInitialized) return;
-    
-    const peerId = 'user_' + currentUserId;
-    
-    peer = new Peer(peerId, {
-        debug: 2,
-        config: {
-            iceServers: [
-                { urls: 'stun:stun.l.google.com:19302' },
-                { urls: 'stun:stun1.l.google.com:19302' },
-                { urls: 'stun:stun2.l.google.com:19302' },
-                { urls: 'stun:stun3.l.google.com:19302' },
-                { urls: 'stun:stun4.l.google.com:19302' },
-                { urls: 'stun:stun.ekiga.net' },
-                { urls: 'stun:stun.iptel.org' },
-                {
-                    urls: 'turn:numb.viagenie.ca',
-                    credential: 'muazkh',
-                    username: 'webrtc@live.com'
-                }
-            ],
-            iceTransportPolicy: 'all',
-            iceCandidatePoolSize: 10
-        }
-    });
-    
-    peer.on('open', (id) => {
-        console.log('✅ PeerJS подключен:', id);
-        peerInitialized = true;
-        usersRef.child(currentUser.uid + '/peerId').set(id);
-        showToast('✅ Голосовая связь готова');
-        if (peerReconnectTimer) {
-            clearTimeout(peerReconnectTimer);
-            peerReconnectTimer = null;
-        }
-    });
-    
-    peer.on('call', (call) => {
-        console.log('📞 Входящий звонок от:', call.peer);
-        showIncomingCall(call);
-    });
-    
-    peer.on('error', (err) => {
-        console.error('❌ PeerJS error:', err);
-        if (err.message.includes('Lost connection') || err.message.includes('Could not connect')) {
-            showToast('⚠️ Потеря соединения, переподключение...');
-            peerReconnectTimer = setTimeout(() => {
-                if (!peerInitialized) {
-                    peer.destroy();
-                    peer = null;
-                    peerInitialized = false;
-                    initPeer();
-                }
-            }, 3000);
-        } else if (err.message.includes('unavailable ID')) {
-            const newId = 'user_' + currentUserId + '_' + Date.now().toString(36);
-            peer.destroy();
-            peer = new Peer(newId, {
-                debug: 2,
-                config: {
-                    iceServers: [
-                        { urls: 'stun:stun.l.google.com:19302' },
-                        { urls: 'stun:stun1.l.google.com:19302' },
-                        { urls: 'stun:stun.ekiga.net' }
-                    ]
-                }
-            });
-            peer.on('open', (id) => {
-                usersRef.child(currentUser.uid + '/peerId').set(id);
-                peerInitialized = true;
-            });
-        }
-    });
-    
-    peer.on('close', () => {
-        console.log('🔌 PeerJS соединение закрыто');
-        peerInitialized = false;
-        if (!peerReconnectTimer) {
-            peerReconnectTimer = setTimeout(() => {
-                peer = null;
-                initPeer();
-            }, 5000);
-        }
-    });
-    
-    setTimeout(() => {
-        if (!peerInitialized) {
-            console.warn('⚠️ PeerJS подключение зависло, перезапуск...');
-            if (peer) {
-                peer.destroy();
-                peer = null;
-            }
-            initPeer();
-        }
-    }, 10000);
-}
-
-function startCall(contactName, video = false) {
-    if (!peer || !peerInitialized) {
-        showToast('❌ Соединение не готово, попробуйте позже');
-        return;
-    }
-    usersRef.orderByChild('name').equalTo(contactName).once('value').then(snap => {
-        let targetPeerId = null;
-        snap.forEach(childSnap => {
-            const data = childSnap.val();
-            if (data.peerId) targetPeerId = data.peerId;
-        });
-        if (!targetPeerId) { showToast('❌ Контакт не в сети'); return; }
-        showCallUI(contactName, 'Звонок...', video);
-        navigator.mediaDevices.getUserMedia({ audio: true, video: video })
-            .then(stream => {
-                localStream = stream;
-                const call = peer.call(targetPeerId, stream, { 
-                    metadata: { caller: currentName, video: video } 
-                });
-                currentCall = call;
-                setupCallListeners(call);
-            }).catch(err => {
-                showToast('❌ Нет доступа к микрофону/камере');
-                hideCallUI();
-            });
-    }).catch(err => showToast('❌ Ошибка: ' + err.message));
-}
-
-function setupCallListeners(call) {
-    call.on('stream', (stream) => {
-        remoteStream = stream;
-        document.getElementById('callStatus').textContent = 'В разговоре';
-        const container = document.getElementById('callVideoContainer');
-        if (container) {
-            const video = document.createElement('video');
-            video.autoplay = true;
-            video.srcObject = stream;
-            video.style.cssText = 'width:100%;max-height:200px;border-radius:12px;background:#000;margin:8px 0;object-fit:cover;';
-            container.innerHTML = '';
-            container.appendChild(video);
-        }
-    });
-    call.on('close', () => endCall());
-}
-
-function showIncomingCall(call) {
-    const caller = call.metadata?.caller || 'Неизвестный';
-    const isVideo = call.metadata?.video || false;
-    showModal(`
-        <div style="text-align:center;">
-            <div style="font-size:48px;margin:16px 0;">${isVideo ? '📹' : '📞'}</div>
-            <div style="font-size:20px;font-weight:600;color:var(--text-primary);">${caller}</div>
-            <div style="color:var(--text-secondary);margin:4px 0 20px;">Входящий звонок...</div>
-            <div style="display:flex;gap:16px;justify-content:center;">
-                <button onclick="answerCall(true)" style="width:64px;height:64px;border-radius:50%;border:none;background:var(--success);color:#fff;font-size:28px;cursor:pointer;">📞</button>
-                <button onclick="declineCall()" style="width:64px;height:64px;border-radius:50%;border:none;background:var(--danger);color:#fff;font-size:28px;cursor:pointer;">✕</button>
-            </div>
-        </div>
-    `);
-    window._incomingCall = call;
-    window._incomingCaller = caller;
-    window._incomingVideo = isVideo;
-}
-
-function answerCall(withVideo = false) {
-    closeModal();
-    const call = window._incomingCall;
-    if (!call) return;
-    const isVideo = window._incomingVideo || withVideo;
-    const caller = window._incomingCaller || 'Собеседник';
-    showCallUI(caller, 'Соединение...', isVideo);
-    navigator.mediaDevices.getUserMedia({ audio: true, video: isVideo })
-        .then(stream => {
-            localStream = stream;
-            call.answer(stream);
-            currentCall = call;
-            setupCallListeners(call);
-            document.getElementById('callStatus').textContent = 'В разговоре';
-        }).catch(err => {
-            showToast('❌ Нет доступа к микрофону/камере');
-            hideCallUI();
-        });
-}
-
-function declineCall() {
-    closeModal();
-    if (window._incomingCall) window._incomingCall.close();
-    showToast('📞 Звонок отклонён');
-}
-
-function showCallUI(contactName, status, video = false) {
-    const overlay = document.getElementById('callOverlay');
-    document.getElementById('callName').textContent = contactName;
-    document.getElementById('callStatus').textContent = status;
-    document.getElementById('callAvatar').textContent = video ? '📹' : '📞';
-    overlay.classList.add('active');
-    if (localStream && video) {
-        const container = document.getElementById('callVideoContainer');
-        const videoEl = document.createElement('video');
-        videoEl.autoplay = true;
-        videoEl.muted = true;
-        videoEl.srcObject = localStream;
-        videoEl.style.cssText = 'width:100%;max-height:200px;border-radius:12px;background:#000;margin:8px 0;object-fit:cover;';
-        container.innerHTML = '';
-        container.appendChild(videoEl);
-    }
-}
-
-function hideCallUI() {
-    document.getElementById('callOverlay').classList.remove('active');
-    document.getElementById('callVideoContainer').innerHTML = '';
-}
-
-function endCall() {
-    if (currentCall) { currentCall.close(); currentCall = null; }
-    if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
-    if (remoteStream) { remoteStream.getTracks().forEach(t => t.stop()); remoteStream = null; }
-    hideCallUI();
-    showToast('📞 Звонок завершён');
-}
-
-// Кнопки звонков
-voiceCallBtn.addEventListener('click', () => {
-    if (currentContact === 'all' || currentContact.startsWith('group_')) {
-        showToast('📞 Звонок доступен только для личных чатов');
-        return;
-    }
-    startCall(currentContact, false);
-});
-
-videoCallBtn.addEventListener('click', () => {
-    if (currentContact === 'all' || currentContact.startsWith('group_')) {
-        showToast('📹 Видеозвонок доступен только для личных чатов');
-        return;
-    }
-    startCall(currentContact, true);
-});
-
-document.getElementById('callEndBtn').addEventListener('click', endCall);
-document.getElementById('callMuteBtn').addEventListener('click', () => {
-    if (localStream) {
-        const audioTracks = localStream.getAudioTracks();
-        audioTracks.forEach(track => track.enabled = !track.enabled);
-        document.getElementById('callMuteBtn').textContent = audioTracks[0]?.enabled ? '🔊' : '🔇';
-    }
-});
-document.getElementById('callVideoBtn').addEventListener('click', () => {
-    if (localStream) {
-        const videoTracks = localStream.getVideoTracks();
-        videoTracks.forEach(track => track.enabled = !track.enabled);
-        document.getElementById('callVideoBtn').textContent = videoTracks[0]?.enabled ? '📹' : '🚫';
-    }
-});
 
 // ============================================================
 // АУТЕНТИФИКАЦИЯ
@@ -4086,8 +3636,6 @@ auth.onAuthStateChanged(user => {
             if ("Notification" in window && Notification.permission === "default") {
                 Notification.requestPermission();
             }
-            // Инициализация PeerJS для звонков
-            setTimeout(initPeer, 1000);
         });
     } else {
         if (onlineInterval) { clearInterval(onlineInterval); onlineInterval = null; }
@@ -4160,6 +3708,7 @@ createGroupBtn.addEventListener('click', createGroup);
 // ============================================================
 console.log('🚀 ICQ-чат v5.0 запущен!');
 console.log('✅ Все функции интегрированы');
+console.log('✅ Звонки через Firebase (без PeerJS)');
 </script>
 </body>
 </html>
