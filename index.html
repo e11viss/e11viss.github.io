@@ -31,7 +31,6 @@
             display: flex;
             flex-direction: column;
         }
-
         :root {
             --bg-primary: #1a1a1e;
             --bg-secondary: #2c2c30;
@@ -52,7 +51,6 @@
             --bubble-other: #2c2c30;
             --modal-bg: rgba(0, 0, 0, 0.7);
         }
-
         [data-theme="light"] {
             --bg-primary: #f0f0f2;
             --bg-secondary: #ffffff;
@@ -71,7 +69,6 @@
             --bubble-other: #e5e5ea;
             --modal-bg: rgba(0, 0, 0, 0.5);
         }
-
         .chat-app {
             display: flex;
             width: 100%;
@@ -81,7 +78,6 @@
             overflow: hidden;
             position: relative;
         }
-
         .contact-panel {
             width: 280px;
             background: var(--bg-panel);
@@ -131,7 +127,7 @@
             background-size: cover;
             background-position: center;
             flex-shrink: 0;
-            transition: transform 0.2s;
+            transition: transform .2s;
         }
         .contact-panel .header .profile-icon:hover {
             transform: scale(1.05);
@@ -303,7 +299,7 @@
             background: #636366;
             border-radius: 50%;
             border: 2px solid var(--bg-panel);
-            transition: background 0.3s;
+            transition: background .3s;
         }
         .contact-item .avatar .online-dot.online {
             background: var(--success);
@@ -361,7 +357,6 @@
         .contact-item .remove-contact:hover {
             color: var(--danger);
         }
-
         .chat-panel {
             flex: 1;
             display: flex;
@@ -441,7 +436,6 @@
         .chat-header .header-actions button:hover {
             background: var(--bg-hover);
         }
-
         .messages-area {
             flex: 1;
             overflow-y: auto;
@@ -564,10 +558,10 @@
         @keyframes blink {
             0%,
             100% {
-                opacity: .4
+                opacity: .4;
             }
             50% {
-                opacity: 1
+                opacity: 1;
             }
         }
         .message-row.mine .bubble .time-status-wrap,
@@ -625,7 +619,6 @@
         .copy-btn:hover {
             background: rgba(255, 255, 255, .1);
         }
-
         .input-area {
             padding: 10px 14px;
             background: var(--bg-panel);
@@ -810,7 +803,6 @@
         #fileInput {
             display: none;
         }
-
         .status-bar {
             text-align: center;
             font-size: 12px;
@@ -827,8 +819,6 @@
         .status-bar.warning {
             color: #ffd60a;
         }
-
-        /* ===== КОНТЕКСТНОЕ МЕНЮ ===== */
         .context-menu {
             display: none;
             position: fixed;
@@ -887,8 +877,6 @@
             font-size: 12px;
             color: var(--text-muted);
         }
-
-        /* ===== МОДАЛКА НАСТРОЕК ===== */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -1024,7 +1012,6 @@
         .modal .input-field:focus {
             border-color: var(--accent);
         }
-
         .bottom-sheet {
             display: none;
             position: fixed;
@@ -1088,7 +1075,6 @@
         .bottom-sheet-overlay.active {
             display: block;
         }
-
         .mobile-back-btn {
             display: none;
             background: 0 0;
@@ -1119,7 +1105,6 @@
         .contact-panel-overlay.active {
             display: block;
         }
-
         .new-messages-btn {
             position: absolute;
             bottom: 80px;
@@ -1149,7 +1134,6 @@
             padding: 0 8px;
             font-size: 12px;
         }
-
         .typing-indicator {
             padding: 6px 18px;
             font-size: 13px;
@@ -1193,7 +1177,6 @@
                 opacity: 1;
             }
         }
-
         @media(max-width:768px) {
             .contact-panel {
                 position: fixed;
@@ -1347,7 +1330,6 @@
         <button class="cancel-btn" id="bottomSheetCancel">Отмена</button>
     </div>
     <div class="context-menu" id="contextMenu"></div>
-
     <script>
         // ============================================================
         // FIREBASE
@@ -1396,21 +1378,29 @@
                 if (data.status !== 'ok') throw new Error('Ошибка: ' + (data.message || 'Неизвестная ошибка'));
                 const directLink = data.data.link || data.data.downloadPage;
                 return { directLink: directLink, fileName: file.name, fileSize: file.size };
-            } catch (err) { console.error('Upload error:', err);
-                throw err; }
+            } catch (err) {
+                console.error('Upload error:', err);
+                throw err;
+            }
         }
 
         // ============================================================
         // СКАЧИВАНИЕ ФАЙЛА
         // ============================================================
         function downloadFile(url, fileName) {
-            if (!url) { alert('Ссылка на файл не найдена'); return; }
+            if (!url) {
+                alert('Ссылка на файл не найдена');
+                return;
+            }
             const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
             if (isMobile) {
                 window.open(url, '_blank');
             } else {
                 fetch(url)
-                    .then(r => { if (!r.ok) throw new Error('Ошибка'); return r.blob(); })
+                    .then(r => {
+                        if (!r.ok) throw new Error('Ошибка');
+                        return r.blob();
+                    })
                     .then(blob => {
                         const blobUrl = URL.createObjectURL(blob);
                         const link = document.createElement('a');
@@ -1421,7 +1411,9 @@
                         document.body.removeChild(link);
                         setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
                     })
-                    .catch(() => { window.open(url, '_blank'); });
+                    .catch(() => {
+                        window.open(url, '_blank');
+                    });
             }
         }
 
@@ -1593,10 +1585,10 @@
         let notificationsEnabled = true;
         let currentTheme = 'dark';
         let messageStatuses = {};
-        let lastNotificationCount = 0;
+        let lastNotifiedMessageCount = 0;
 
         // ============================================================
-        // НАСТРОЙКИ ПРОКСИ (в модалке)
+        // НАСТРОЙКИ ПРОКСИ
         // ============================================================
         let proxySettings = {
             enabled: false,
@@ -1640,7 +1632,10 @@
         // НАСТРОЙКИ (МОДАЛКА)
         // ============================================================
         settingsBtn.addEventListener('click', () => {
-            if (!currentUser) { alert('Войдите в систему'); return; }
+            if (!currentUser) {
+                alert('Войдите в систему');
+                return;
+            }
             showSettingsModal();
         });
 
@@ -1655,7 +1650,6 @@
             modal.style.cssText =
                 'background:var(--bg-panel);border-radius:16px;padding:24px 28px;max-width:420px;width:90%;max-height:85vh;overflow-y:auto;border:1px solid var(--border-color);';
 
-            // Получаем текущий аватар
             let currentAvatarUrl = '';
             usersRef.child(currentUser.uid + '/avatar').once('value').then(snap => {
                 currentAvatarUrl = snap.val() || '';
@@ -1673,91 +1667,84 @@
         function generateSettingsHTML(avatarUrl) {
             const avatarStyle = avatarUrl ? 'background-image:url(' + avatarUrl + ');' : '';
             return `
-                <div class="modal-header">
-                    <h2>Настройки</h2>
-                    <button class="close-btn">✕</button>
-                </div>
-                
-                <div class="setting-item">
-                    <div>
-                        <div class="label">Имя пользователя</div>
-                        <div class="desc">${currentName || 'Не задано'}</div>
+                    <div class="modal-header">
+                        <h2>Настройки</h2>
+                        <button class="close-btn">✕</button>
                     </div>
-                    <button id="changeNameBtn" style="background:var(--accent);color:white;border:none;border-radius:16px;padding:6px 16px;font-size:13px;cursor:pointer;">Изменить</button>
-                </div>
-                
-                <div class="setting-item">
-                    <div>
-                        <div class="label">Аватар</div>
-                        <div class="desc">Нажмите на аватар чтобы загрузить новый</div>
-                    </div>
-                    <div class="avatar-upload">
-                        <div class="preview" id="avatarPreview" style="${avatarStyle}background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;font-size:28px;color:#fff;background-color:var(--accent);">
-                            ${avatarUrl ? '' : (currentName ? currentName.charAt(0).toUpperCase() : '?')}
+                    <div class="setting-item">
+                        <div>
+                            <div class="label">Имя пользователя</div>
+                            <div class="desc">${currentName || 'Не задано'}</div>
                         </div>
-                        <button class="upload-btn" id="uploadAvatarBtn">📷 Загрузить</button>
+                        <button id="changeNameBtn" style="background:var(--accent);color:white;border:none;border-radius:16px;padding:6px 16px;font-size:13px;cursor:pointer;">Изменить</button>
                     </div>
-                </div>
-                
-                <div class="setting-item">
-                    <div>
-                        <div class="label">Тёмная тема</div>
-                        <div class="desc">Включить тёмную тему</div>
+                    <div class="setting-item">
+                        <div>
+                            <div class="label">Аватар</div>
+                            <div class="desc">Нажмите на аватар чтобы загрузить новый</div>
+                        </div>
+                        <div class="avatar-upload">
+                            <div class="preview" id="avatarPreview" style="${avatarStyle}background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;font-size:28px;color:#fff;background-color:var(--accent);">
+                                ${avatarUrl ? '' : (currentName ? currentName.charAt(0).toUpperCase() : '?')}
+                            </div>
+                            <button class="upload-btn" id="uploadAvatarBtn">📷 Загрузить</button>
+                        </div>
                     </div>
-                    <div class="toggle-switch ${currentTheme === 'dark' ? 'active' : ''}" id="themeToggle">
-                        <div class="slider" style="transform:${currentTheme === 'dark' ? 'translateX(20px)' : 'translateX(0)'};"></div>
+                    <div class="setting-item">
+                        <div>
+                            <div class="label">Тёмная тема</div>
+                            <div class="desc">Включить тёмную тему</div>
+                        </div>
+                        <div class="toggle-switch ${currentTheme === 'dark' ? 'active' : ''}" id="themeToggle">
+                            <div class="slider" style="transform:${currentTheme === 'dark' ? 'translateX(20px)' : 'translateX(0)'};"></div>
+                        </div>
                     </div>
-                </div>
-                
-                <div class="setting-item">
-                    <div>
-                        <div class="label">Уведомления</div>
-                        <div class="desc">Показывать уведомления о новых сообщениях</div>
+                    <div class="setting-item">
+                        <div>
+                            <div class="label">Уведомления</div>
+                            <div class="desc">Показывать уведомления о новых сообщениях</div>
+                        </div>
+                        <div class="toggle-switch ${notificationsEnabled ? 'active' : ''}" id="notifyToggle">
+                            <div class="slider" style="transform:${notificationsEnabled ? 'translateX(20px)' : 'translateX(0)'};"></div>
+                        </div>
                     </div>
-                    <div class="toggle-switch ${notificationsEnabled ? 'active' : ''}" id="notifyToggle">
-                        <div class="slider" style="transform:${notificationsEnabled ? 'translateX(20px)' : 'translateX(0)'};"></div>
+                    <div class="setting-item">
+                        <div>
+                            <div class="label">Прокси</div>
+                            <div class="desc">Использовать прокси для обхода блокировок</div>
+                        </div>
+                        <div class="toggle-switch ${proxySettings.enabled ? 'active' : ''}" id="proxyToggle">
+                            <div class="slider" style="transform:${proxySettings.enabled ? 'translateX(20px)' : 'translateX(0)'};"></div>
+                        </div>
                     </div>
-                </div>
-                
-                <div class="setting-item">
-                    <div>
-                        <div class="label">Прокси</div>
-                        <div class="desc">Использовать прокси для обхода блокировок</div>
+                    ${proxySettings.enabled ? `
+                    <div class="setting-item" style="flex-direction:column;align-items:stretch;gap:8px;">
+                        <div>
+                            <div class="label">Адрес прокси</div>
+                            <div class="desc">Например: proxy.example.com</div>
+                        </div>
+                        <input class="input-field" id="proxyUrl" value="${proxySettings.url || ''}" placeholder="URL прокси-сервера">
                     </div>
-                    <div class="toggle-switch ${proxySettings.enabled ? 'active' : ''}" id="proxyToggle">
-                        <div class="slider" style="transform:${proxySettings.enabled ? 'translateX(20px)' : 'translateX(0)'};"></div>
+                    <div class="setting-item" style="flex-direction:column;align-items:stretch;gap:8px;">
+                        <div>
+                            <div class="label">Порт прокси</div>
+                            <div class="desc">Например: 8080</div>
+                        </div>
+                        <input class="input-field" id="proxyPort" value="${proxySettings.port || ''}" placeholder="Порт">
                     </div>
-                </div>
-                
-                ${proxySettings.enabled ? `
-                <div class="setting-item" style="flex-direction:column;align-items:stretch;gap:8px;">
-                    <div>
-                        <div class="label">Адрес прокси</div>
-                        <div class="desc">Например: proxy.example.com</div>
+                    ` : ''}
+                    <div class="setting-item" style="border-bottom:none;padding-top:16px;">
+                        <button id="saveProxyBtn" style="background:var(--accent);color:white;border:none;border-radius:16px;padding:8px 20px;font-size:14px;cursor:pointer;width:100%;">Сохранить настройки прокси</button>
                     </div>
-                    <input class="input-field" id="proxyUrl" value="${proxySettings.url || ''}" placeholder="URL прокси-сервера">
-                </div>
-                <div class="setting-item" style="flex-direction:column;align-items:stretch;gap:8px;">
-                    <div>
-                        <div class="label">Порт прокси</div>
-                        <div class="desc">Например: 8080</div>
-                    </div>
-                    <input class="input-field" id="proxyPort" value="${proxySettings.port || ''}" placeholder="Порт">
-                </div>
-                ` : ''}
-                
-                <div class="setting-item" style="border-bottom:none;padding-top:16px;">
-                    <button id="saveProxyBtn" style="background:var(--accent);color:white;border:none;border-radius:16px;padding:8px 20px;font-size:14px;cursor:pointer;width:100%;">Сохранить настройки прокси</button>
-                </div>
-            `;
+                `;
         }
 
         function setupSettingsHandlers(modal, overlay) {
-            // Закрытие
             modal.querySelector('.close-btn').addEventListener('click', () => overlay.remove());
-            overlay.addEventListener('click', (e) => { if (e.target === overlay) overlay.remove(); });
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) overlay.remove();
+            });
 
-            // Тема
             const themeToggle = modal.querySelector('#themeToggle');
             if (themeToggle) {
                 themeToggle.addEventListener('click', () => {
@@ -1768,7 +1755,6 @@
                 });
             }
 
-            // Уведомления
             const notifyToggle = modal.querySelector('#notifyToggle');
             if (notifyToggle) {
                 notifyToggle.addEventListener('click', () => {
@@ -1780,7 +1766,6 @@
                 });
             }
 
-            // Прокси
             const proxyToggle = modal.querySelector('#proxyToggle');
             if (proxyToggle) {
                 proxyToggle.addEventListener('click', () => {
@@ -1789,13 +1774,11 @@
                     const slider = proxyToggle.querySelector('.slider');
                     slider.style.transform = proxySettings.enabled ? 'translateX(20px)' : 'translateX(0)';
                     saveProxySettings();
-                    // Перезагружаем модалку для показа полей
                     overlay.remove();
                     showSettingsModal();
                 });
             }
 
-            // Смена имени
             const changeNameBtn = modal.querySelector('#changeNameBtn');
             if (changeNameBtn) {
                 changeNameBtn.addEventListener('click', () => {
@@ -1812,7 +1795,6 @@
                 });
             }
 
-            // Загрузка аватара
             const uploadAvatarBtn = modal.querySelector('#uploadAvatarBtn');
             if (uploadAvatarBtn) {
                 uploadAvatarBtn.addEventListener('click', () => {
@@ -1834,7 +1816,6 @@
                 });
             }
 
-            // Сохранение прокси
             const saveProxyBtn = modal.querySelector('#saveProxyBtn');
             if (saveProxyBtn) {
                 saveProxyBtn.addEventListener('click', () => {
@@ -1941,17 +1922,15 @@
             if (!("Notification" in window) || Notification.permission !== "granted") return;
             try {
                 const notification = new Notification(title, { body: body, icon: '📩' });
-                notification.onclick = () => { window.focus();
-                    notification.close(); };
+                notification.onclick = () => {
+                    window.focus();
+                    notification.close();
+                };
                 setTimeout(() => notification.close(), 15000);
             } catch (e) {}
         }
 
-        let lastNotifiedMessageCount = 0;
-
         function checkAndShowNotification(data) {
-            // Показываем уведомление ТОЛЬКО если это новое сообщение от другого пользователя
-            // и оно не было показано ранее
             if (data.name !== currentName && (data.to === currentName || !data.to)) {
                 const messageId = data.key || data.timestamp || Date.now();
                 if (messageId !== lastNotifiedMessageCount) {
@@ -2025,13 +2004,18 @@
         function saveContacts() {
             if (!currentUser) return;
             const contactsData = {};
-            contactListArray.forEach(name => { contactsData[sanitizeKey(name)] = true; });
+            contactListArray.forEach(name => {
+                contactsData[sanitizeKey(name)] = true;
+            });
             usersRef.child(currentUser.uid + '/contacts').set(contactsData);
         }
 
         function addContact(contactName) {
             if (!contactName || contactName === currentName) return;
-            if (contactListArray.includes(contactName)) { alert('Контакт уже есть в списке.'); return; }
+            if (contactListArray.includes(contactName)) {
+                alert('Контакт уже есть в списке.');
+                return;
+            }
             contactListArray.push(contactName);
             saveContacts();
             renderContacts();
@@ -2110,8 +2094,10 @@
                 removeBtn.className = 'remove-contact';
                 removeBtn.textContent = '✕';
                 removeBtn.title = 'Удалить контакт';
-                removeBtn.onclick = (e) => { e.stopPropagation(); if (confirm('Удалить контакт "' + displayName +
-                        '" из списка?')) removeContact(id); };
+                removeBtn.onclick = (e) => {
+                    e.stopPropagation();
+                    if (confirm('Удалить контакт "' + displayName + '" из списка?')) removeContact(id);
+                };
                 div.appendChild(removeBtn);
             }
             div.onclick = () => {
@@ -2132,7 +2118,9 @@
                     const toRemove = [];
                     messagesCache.forEach(item => {
                         if (item.name === id || item.to === id || (item.name === currentName && item.to ===
-                                id)) { toRemove.push(item.key); }
+                                id)) {
+                            toRemove.push(item.key);
+                        }
                     });
                     toRemove.forEach(key => messagesRef.child(key).remove());
                     delete contacts[id];
@@ -2192,7 +2180,9 @@
             const node = messageNodes[key];
             if (!node) return;
             const statusEl = node.querySelector('.message-status');
-            if (statusEl) { statusEl.innerHTML = getStatusHTML(status); }
+            if (statusEl) {
+                statusEl.innerHTML = getStatusHTML(status);
+            }
             const msg = messagesCache.find(m => m.key === key);
             if (msg) msg.status = status;
         }
@@ -2213,7 +2203,10 @@
         // ФАЙЛЫ
         // ============================================================
         function shareFile(file) {
-            if (!currentUser) { alert('Войдите в систему'); return; }
+            if (!currentUser) {
+                alert('Войдите в систему');
+                return;
+            }
             const to = recipientInput.value.trim() || null;
             addSystemMessage('📤 Загружаем файл "' + file.name + '" на GoFile.io...');
             fileBtn.style.opacity = '0.5';
@@ -2255,7 +2248,10 @@
         }
 
         fileBtn.addEventListener('click', () => {
-            if (!currentUser) { alert('Войдите в систему'); return; }
+            if (!currentUser) {
+                alert('Войдите в систему');
+                return;
+            }
             fileInput.click();
         });
         fileInput.onchange = (e) => {
@@ -2283,9 +2279,13 @@
                 const typingUsers = Object.keys(data).filter(name => name !== safeName);
                 if (typingUsers.length > 0) {
                     let display = '';
-                    if (typingUsers.length === 1) { display = typingUsers[0] + ' печатает...'; } else if (
-                        typingUsers.length === 2) { display = typingUsers[0] + ' и ' + typingUsers[1] +
-                            ' печатают...'; } else { display = typingUsers.length + ' человек печатают...'; }
+                    if (typingUsers.length === 1) {
+                        display = typingUsers[0] + ' печатает...';
+                    } else if (typingUsers.length === 2) {
+                        display = typingUsers[0] + ' и ' + typingUsers[1] + ' печатают...';
+                    } else {
+                        display = typingUsers.length + ' человек печатают...';
+                    }
                     typingNames.textContent = display;
                     typingIndicator.style.display = 'flex';
                 } else {
@@ -2315,7 +2315,9 @@
             if (input.value.trim()) {
                 if (!typingThrottle) {
                     sendTypingStatus();
-                    typingThrottle = setTimeout(() => { typingThrottle = null; }, 2000);
+                    typingThrottle = setTimeout(() => {
+                        typingThrottle = null;
+                    }, 2000);
                 }
             }
         });
@@ -2325,12 +2327,14 @@
             const safeName = sanitizeKey(currentName);
             const safeContact = currentContact === 'all' ? 'all' : sanitizeKey(currentContact);
             typingRef.child(safeContact).child(safeName).remove();
-            if (typingTimeout) { clearTimeout(typingTimeout);
-                typingTimeout = null; }
+            if (typingTimeout) {
+                clearTimeout(typingTimeout);
+                typingTimeout = null;
+            }
         }
 
         // ============================================================
-        // КОНТЕКСТНОЕ МЕНЮ (с привязкой к сообщению и границами экрана)
+        // КОНТЕКСТНОЕ МЕНЮ
         // ============================================================
         let contextTarget = null;
 
@@ -2416,27 +2420,22 @@
             const menuWidth = 200;
             const menuHeight = Math.min(actions.length * 44 + 20, window.innerHeight - 40);
 
-            // Проверяем границы по горизонтали
             if (left + menuWidth > window.innerWidth) {
                 left = window.innerWidth - menuWidth - 10;
             }
             if (left < 10) left = 10;
 
-            // Проверяем границы по вертикали
             if (top + menuHeight > window.innerHeight) {
                 top = window.innerHeight - menuHeight - 10;
             }
             if (top < 10) top = 10;
 
-            // Если меню не помещается снизу — показываем над сообщением
             const row = e.target.closest?.('.message-row');
             if (row) {
                 const rect = row.getBoundingClientRect();
-                // Если места снизу меньше 100px — показываем сверху
                 if (window.innerHeight - top < 100 && rect.top > menuHeight + 20) {
                     top = rect.top - menuHeight - 10;
                 }
-                // Если места сверху тоже нет — центрируем по вертикали
                 if (top < 10) {
                     top = Math.max(10, (window.innerHeight - menuHeight) / 2);
                 }
@@ -2496,16 +2495,20 @@
                     input.focus();
                     break;
                 case 'edit':
-                    if (msgData.name !== currentName) { alert('Редактировать можно только свои сообщения.');
-                        return; }
+                    if (msgData.name !== currentName) {
+                        alert('Редактировать можно только свои сообщения.');
+                        return;
+                    }
                     const newText = prompt('Редактировать:', msgData.text);
                     if (newText !== null && newText.trim() !== '') {
                         messagesRef.child(key).update({ text: newText.trim(), edited: true });
                     }
                     break;
                 case 'delete':
-                    if (msgData.name !== currentName) { alert('Удалять можно только свои сообщения.');
-                        return; }
+                    if (msgData.name !== currentName) {
+                        alert('Удалять можно только свои сообщения.');
+                        return;
+                    }
                     if (confirm('Удалить сообщение?')) messagesRef.child(key).remove();
                     break;
                 case 'forward':
@@ -2553,8 +2556,10 @@
                 btn.textContent = emoji;
                 btn.style.cssText =
                     'font-size:28px;flex:1;text-align:center;padding:8px;background:none;border:none;cursor:pointer;';
-                btn.onclick = () => { toggleReaction(key, emoji);
-                    hideBottomSheet(); };
+                btn.onclick = () => {
+                    toggleReaction(key, emoji);
+                    hideBottomSheet();
+                };
                 reactionRow.appendChild(btn);
             });
             bottomSheetContent.appendChild(reactionRow);
@@ -2562,8 +2567,10 @@
                 const btn = document.createElement('button');
                 btn.textContent = item.label;
                 btn.dataset.action = item.action;
-                btn.onclick = () => { hideBottomSheet();
-                    handleContextAction(item.action, key); };
+                btn.onclick = () => {
+                    hideBottomSheet();
+                    handleContextAction(item.action, key);
+                };
                 bottomSheetContent.appendChild(btn);
             });
             bottomSheet.classList.add('active');
@@ -2614,11 +2621,12 @@
             messagesRef.limitToLast(1).on('child_added', (snapshot) => {
                 const data = snapshot.val();
                 const key = snapshot.key;
-                if (messagesCache.some(m => m.key === key) || messageNodes[key]) { return; }
+                if (messagesCache.some(m => m.key === key) || messageNodes[key]) {
+                    return;
+                }
 
                 // Проверяем уведомления до добавления в UI
                 if (data.name !== currentName && (data.to === currentName || !data.to)) {
-                    // Показываем уведомление только если это новое сообщение
                     const msgKey = key || Date.now();
                     if (msgKey !== lastNotifiedMessageCount) {
                         lastNotifiedMessageCount = msgKey;
@@ -2697,7 +2705,9 @@
         }
 
         function addMessageToUI(key, data) {
-            if (messagesCache.some(m => m.key === key) || messageNodes[key]) { return; }
+            if (messagesCache.some(m => m.key === key) || messageNodes[key]) {
+                return;
+            }
             if (!isMessageRelevant(data)) {
                 if (data.name !== currentName) {
                     const contactId = data.to && data.to !== currentName ? data.to : data.name;
@@ -2785,16 +2795,17 @@
                 copyBtn.textContent = '📋 Копировать ссылку';
                 copyBtn.onclick = (e) => {
                     e.stopPropagation();
-                    navigator.clipboard.writeText(data.text).then(() => { alert('Ссылка скопирована!'); })
-                        .catch(() => {
-                            const textarea = document.createElement('textarea');
-                            textarea.value = data.text;
-                            document.body.appendChild(textarea);
-                            textarea.select();
-                            document.execCommand('copy');
-                            document.body.removeChild(textarea);
-                            alert('Ссылка скопирована!');
-                        });
+                    navigator.clipboard.writeText(data.text).then(() => {
+                        alert('Ссылка скопирована!');
+                    }).catch(() => {
+                        const textarea = document.createElement('textarea');
+                        textarea.value = data.text;
+                        document.body.appendChild(textarea);
+                        textarea.select();
+                        document.execCommand('copy');
+                        document.body.removeChild(textarea);
+                        alert('Ссылка скопирована!');
+                    });
                 };
                 textDiv.appendChild(copyBtn);
             } else if (data.text) {
@@ -3049,7 +3060,9 @@
                         audioCtx = new(window.AudioContext || window.webkitAudioContext)();
                         if (audioCtx.state === 'suspended') audioCtx.resume();
                         isSoundEnabled = true;
-                    } catch (e) { isSoundEnabled = false; }
+                    } catch (e) {
+                        isSoundEnabled = false;
+                    }
                 }
             };
             document.addEventListener('touchstart', init, { once: true });
@@ -3117,11 +3130,15 @@
                     messageListenerStarted = false;
                     listenMessages();
                     setupOnlineStatus();
-                    onlineRef.on('value', () => { updateOnlineDots(); });
+                    onlineRef.on('value', () => {
+                        updateOnlineDots();
+                    });
                 });
             } else {
-                if (onlineInterval) { clearInterval(onlineInterval);
-                    onlineInterval = null; }
+                if (onlineInterval) {
+                    clearInterval(onlineInterval);
+                    onlineInterval = null;
+                }
                 const safeName = sanitizeKey(currentName);
                 if (safeName) onlineRef.child(safeName).remove();
 
@@ -3137,7 +3154,9 @@
                     w.appendChild(passwordInput);
                     w.appendChild(togglePasswordBtn);
                     loginArea.insertBefore(w, loginArea.querySelector('.auth-buttons'));
-                } else { wrapper.style.display = ''; }
+                } else {
+                    wrapper.style.display = '';
+                }
                 logoutBtn.style.display = 'none';
                 contactTools.style.display = 'none';
                 input.disabled = true;
@@ -3160,9 +3179,15 @@
         registerBtn.onclick = () => {
             const email = emailInput.value.trim();
             const pass = passwordInput.value.trim();
-            if (!email || !pass) { alert('Введите email и пароль'); return; }
+            if (!email || !pass) {
+                alert('Введите email и пароль');
+                return;
+            }
             auth.createUserWithEmailAndPassword(email, pass)
-                .then((cred) => { const name = email.split('@')[0]; return usersRef.child(cred.user.uid).set({ name }); })
+                .then((cred) => {
+                    const name = email.split('@')[0];
+                    return usersRef.child(cred.user.uid).set({ name });
+                })
                 .then(() => alert('Регистрация успешна!'))
                 .catch(err => alert('Ошибка: ' + err.message));
         };
@@ -3170,19 +3195,27 @@
         loginBtn.onclick = () => {
             const email = emailInput.value.trim();
             const pass = passwordInput.value.trim();
-            if (!email || !pass) { alert('Введите email и пароль'); return; }
+            if (!email || !pass) {
+                alert('Введите email и пароль');
+                return;
+            }
             auth.signInWithEmailAndPassword(email, pass)
                 .then(() => alert('Добро пожаловать!'))
                 .catch(err => alert('Ошибка: ' + err.message));
         };
 
-        logoutBtn.onclick = () => { auth.signOut(); };
+        logoutBtn.onclick = () => {
+            auth.signOut();
+        };
 
         addContactBtn.onclick = () => {
             const name = prompt('Введите имя пользователя для добавления в контакты:');
             if (name && name.trim()) {
                 const trimmed = name.trim();
-                if (trimmed === currentName) { alert('Нельзя добавить самого себя.'); return; }
+                if (trimmed === currentName) {
+                    alert('Нельзя добавить самого себя.');
+                    return;
+                }
                 addContact(trimmed);
             }
         };
@@ -3216,7 +3249,9 @@
             const dropdown = document.getElementById('contactDropdown');
             dropdown.innerHTML = '';
             const allContacts = new Set(contactListArray);
-            Object.keys(contacts).forEach(c => { if (c !== 'all') allContacts.add(c); });
+            Object.keys(contacts).forEach(c => {
+                if (c !== 'all') allContacts.add(c);
+            });
             const sorted = Array.from(allContacts).sort();
             if (sorted.length === 0) {
                 const div = document.createElement('div');
@@ -3238,7 +3273,9 @@
         });
 
         recipientInput.addEventListener('blur', () => {
-            setTimeout(() => { document.getElementById('contactDropdown').classList.remove('active'); }, 200);
+            setTimeout(() => {
+                document.getElementById('contactDropdown').classList.remove('active');
+            }, 200);
         });
 
         myAvatar.addEventListener('dblclick', () => {
