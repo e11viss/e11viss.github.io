@@ -688,10 +688,11 @@
         .voice-message {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 8px;
             padding: 4px 0;
             min-width: 200px;
             max-width: 350px;
+            flex-wrap: wrap;
         }
         .voice-message .play-btn {
             width: 36px;
@@ -723,6 +724,7 @@
             gap: 2px;
             cursor: pointer;
             padding: 0 4px;
+            min-width: 60px;
         }
         .voice-message .waveform .bar {
             width: 3px;
@@ -764,6 +766,18 @@
             color: var(--accent);
             background: rgba(10,132,255,0.1);
         }
+        .voice-message .download-btn {
+            background: none;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 2px 8px;
+            font-size: 14px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+            min-height: 28px;
+        }
+        .voice-message .download-btn:hover { background: var(--bg-hover); }
 
         .link-preview {
             margin: 6px 0;
@@ -1820,7 +1834,11 @@
     }
 
     function downloadFile(url, fileName) {
-        if (!url) { alert('Ссылка на файл не найдена'); return; }
+        if (!url) { 
+            showToast('❌ Ссылка на файл не найдена');
+            return; 
+        }
+        // Открываем в новой вкладке
         window.open(url, '_blank');
     }
 
@@ -2287,7 +2305,7 @@
     }
 
     // ============================================================
-    // ВОСПРОИЗВЕДЕНИЕ ГОЛОСОВЫХ (ИСПРАВЛЕНО)
+    // ВОСПРОИЗВЕДЕНИЕ ГОЛОСОВЫХ (ИСПРАВЛЕННАЯ ВЕРСИЯ)
     // ============================================================
     function createVoiceMessageElement(data) {
         const container = document.createElement('div');
@@ -2326,6 +2344,19 @@
         speedBtn.textContent = '1×';
         speedBtn.dataset.speed = '1';
         
+        const downloadBtn = document.createElement('button');
+        downloadBtn.className = 'download-btn';
+        downloadBtn.textContent = '📥';
+        downloadBtn.title = 'Скачать голосовое';
+        downloadBtn.onclick = (e) => {
+            e.stopPropagation();
+            if (data.text) {
+                downloadFile(data.text, 'voice_' + Date.now() + '.webm');
+            } else {
+                showToast('❌ Ссылка на файл отсутствует');
+            }
+        };
+        
         let audio = null;
         let isPlaying = false;
         let playSpeed = 1;
@@ -2347,70 +2378,80 @@
         }
         
         playBtn.addEventListener('click', () => {
+            const audioUrl = data.text;
+            if (!audioUrl) {
+                showToast('❌ Ссылка на аудио отсутствует');
+                return;
+            }
+            
             if (!audio) {
-                // Используем правильный формат аудио
-                const audioUrl = data.text;
-                if (!audioUrl) {
-                    showToast('❌ Ссылка на аудио отсутствует');
-                    return;
-                }
-                
-                audio = new Audio();
-                audio.src = audioUrl;
-                audio.preload = 'auto';
-                
-                audio.onloadedmetadata = () => {
-                    if (audio.duration && !isNaN(audio.duration)) {
-                        const total = audio.duration;
+                try {
+                    audio = new Audio();
+                    audio.src = audioUrl;
+                    audio.crossOrigin = 'anonymous';
+                    audio.preload = 'metadata';
+                    
+                    audio.onloadedmetadata = () => {
+                        if (audio.duration && !isNaN(audio.duration) && audio.duration > 0) {
+                            const total = audio.duration;
+                            const mins = String(Math.floor(total / 60)).padStart(2, '0');
+                            const secs = String(Math.floor(total % 60)).padStart(2, '0');
+                            timeLabel.textContent = mins + ':' + secs;
+                            timeLabel.dataset.duration = total;
+                            console.log('✅ Аудио загружено, длительность:', total);
+                        }
+                    };
+                    
+                    audio.oncanplay = () => {
+                        console.log('✅ Аудио готово к воспроизведению');
+                    };
+                    
+                    audio.onended = () => {
+                        isPlaying = false;
+                        playBtn.textContent = '▶';
+                        playBtn.classList.remove('playing');
+                        playBtn.dataset.playing = 'false';
+                        updateWaveform(1);
+                        const total = parseFloat(timeLabel.dataset.duration) || 30;
                         const mins = String(Math.floor(total / 60)).padStart(2, '0');
                         const secs = String(Math.floor(total % 60)).padStart(2, '0');
                         timeLabel.textContent = mins + ':' + secs;
-                        timeLabel.dataset.duration = total;
-                    }
-                };
-                
-                audio.onended = () => {
-                    isPlaying = false;
-                    playBtn.textContent = '▶';
-                    playBtn.classList.remove('playing');
-                    playBtn.dataset.playing = 'false';
-                    updateWaveform(1);
-                    const total = parseFloat(timeLabel.dataset.duration) || 30;
-                    const mins = String(Math.floor(total / 60)).padStart(2, '0');
-                    const secs = String(Math.floor(total % 60)).padStart(2, '0');
-                    timeLabel.textContent = mins + ':' + secs;
-                    if (progressInterval) {
-                        clearInterval(progressInterval);
-                        progressInterval = null;
-                    }
-                    setTimeout(() => {
-                        bars.forEach(bar => bar.classList.remove('active'));
-                    }, 500);
-                };
-                
-                audio.onerror = (e) => {
-                    console.error('Audio error:', e);
-                    showToast('❌ Ошибка воспроизведения. Попробуйте скачать файл.');
-                    isPlaying = false;
-                    playBtn.textContent = '▶';
-                    playBtn.classList.remove('playing');
-                    playBtn.dataset.playing = 'false';
-                    if (progressInterval) {
-                        clearInterval(progressInterval);
-                        progressInterval = null;
-                    }
-                };
-                
-                audio.ontimeupdate = () => {
-                    if (audio.duration && !isNaN(audio.duration)) {
-                        const progress = audio.currentTime / audio.duration;
-                        updateWaveform(progress);
-                        updateTime(audio.currentTime);
-                    }
-                };
-                
-                // Загружаем аудио
-                audio.load();
+                        if (progressInterval) {
+                            clearInterval(progressInterval);
+                            progressInterval = null;
+                        }
+                        setTimeout(() => {
+                            bars.forEach(bar => bar.classList.remove('active'));
+                        }, 500);
+                    };
+                    
+                    audio.onerror = (e) => {
+                        console.error('❌ Audio error:', e);
+                        showToast('❌ Не удалось воспроизвести аудио. Попробуйте скачать.');
+                        isPlaying = false;
+                        playBtn.textContent = '▶';
+                        playBtn.classList.remove('playing');
+                        playBtn.dataset.playing = 'false';
+                        if (progressInterval) {
+                            clearInterval(progressInterval);
+                            progressInterval = null;
+                        }
+                    };
+                    
+                    audio.ontimeupdate = () => {
+                        if (audio.duration && !isNaN(audio.duration) && audio.duration > 0) {
+                            const progress = audio.currentTime / audio.duration;
+                            updateWaveform(progress);
+                            updateTime(audio.currentTime);
+                        }
+                    };
+                    
+                    audio.load();
+                } catch (err) {
+                    console.error('❌ Audio creation error:', err);
+                    showToast('❌ Ошибка создания аудио');
+                    return;
+                }
             }
             
             if (isPlaying) {
@@ -2426,8 +2467,8 @@
             } else {
                 audio.playbackRate = playSpeed;
                 audio.play().catch((err) => {
-                    console.error('Audio play error:', err);
-                    showToast('❌ Ошибка воспроизведения. Попробуйте скачать файл.');
+                    console.error('❌ Audio play error:', err);
+                    showToast('❌ Ошибка воспроизведения. Скачайте файл.');
                 });
                 isPlaying = true;
                 playBtn.textContent = '⏸';
@@ -2438,7 +2479,7 @@
                     clearInterval(progressInterval);
                 }
                 progressInterval = setInterval(() => {
-                    if (audio && audio.duration && !isNaN(audio.duration)) {
+                    if (audio && audio.duration && !isNaN(audio.duration) && audio.duration > 0) {
                         const progress = audio.currentTime / audio.duration;
                         updateWaveform(progress);
                         updateTime(audio.currentTime);
@@ -2463,24 +2504,22 @@
         container.appendChild(waveform);
         container.appendChild(timeLabel);
         container.appendChild(speedBtn);
+        container.appendChild(downloadBtn);
         
         return container;
     }
 
     // ============================================================
-    // ФИЛЬТРАЦИЯ СООБЩЕНИЙ (ИСПРАВЛЕНА)
+    // ФИЛЬТРАЦИЯ СООБЩЕНИЙ
     // ============================================================
     function isMessageRelevant(data) {
         const isPrivate = data.to && data.to !== '';
         
         if (currentContact === 'all') {
-            // В общий чат только НЕ личные сообщения
             return !isPrivate;
         } else if (currentContact.startsWith('group_')) {
-            // Групповые сообщения
             return true;
         } else {
-            // Личный чат - только между мной и контактом
             const isFromMe = data.name === currentName;
             const isFromContact = data.name === currentContact;
             const isToMe = data.to === currentName;
@@ -2493,7 +2532,7 @@
     }
 
     // ============================================================
-    // ОБНОВЛЕНИЕ КОНТАКТОВ (ИСПРАВЛЕНО)
+    // ОБНОВЛЕНИЕ КОНТАКТОВ
     // ============================================================
     function updateContactsFromCache() {
         const newContacts = {};
@@ -3450,7 +3489,7 @@
     }
 
     // ============================================================
-    // ОТПРАВКА СООБЩЕНИЙ (ИСПРАВЛЕНО)
+    // ОТПРАВКА СООБЩЕНИЙ
     // ============================================================
     function sendMessage(text) {
         if (!currentUser || !currentName || !currentUserId) return;
@@ -4030,7 +4069,7 @@
     chatListOverlay.addEventListener('click', closeChatList);
 
     // ============================================================
-    // WEBRTC ЗВОНКИ (ИСПРАВЛЕНА ВЕРСИЯ)
+    // WEBRTC ЗВОНКИ (ИСПРАВЛЕННАЯ ВЕРСИЯ)
     // ============================================================
     let localStream = null;
     let remoteStream = null;
@@ -4056,6 +4095,23 @@
         ],
         iceCandidatePoolSize: 10
     };
+
+    // Проверка занятости пользователя
+    function isUserInCall(userId) {
+        return new Promise((resolve) => {
+            if (!userId) {
+                resolve(false);
+                return;
+            }
+            db.ref('calls/' + sanitizeKey(userId)).once('value').then(snap => {
+                const data = snap.val() || {};
+                const activeCall = Object.values(data).find(c => 
+                    c.status === 'calling' || c.status === 'answered' || c.status === 'connected'
+                );
+                resolve(!!activeCall);
+            }).catch(() => resolve(false));
+        });
+    }
 
     function initCallListener() {
         if (!currentUserId) {
@@ -4094,8 +4150,8 @@
         if (!currentUserId) { showToast('❌ Ошибка идентификации'); return; }
         if (isCallActive) { showToast('❌ Вы уже в звонке'); return; }
         
-        const callsRef = db.ref('calls/' + sanitizeKey(currentUserId));
-        callsRef.once('value', (snap) => {
+        // Проверяем свой активный звонок
+        db.ref('calls/' + sanitizeKey(currentUserId)).once('value').then(snap => {
             const data = snap.val() || {};
             const activeCall = Object.values(data).find(c => 
                 c.status === 'calling' || c.status === 'answered' || c.status === 'connected'
@@ -4105,6 +4161,7 @@
                 return;
             }
             
+            // Ищем получателя
             usersRef.orderByChild('name').equalTo(contactName).once('value').then(snap => {
                 let targetUserId = null;
                 let targetName = null;
@@ -4123,16 +4180,12 @@
                     return;
                 }
                 
-                db.ref('calls/' + sanitizeKey(targetUserId)).once('value').then(snap => {
-                    const data = snap.val() || {};
-                    const activeCall = Object.values(data).find(c => 
-                        c.status === 'calling' || c.status === 'answered' || c.status === 'connected'
-                    );
-                    if (activeCall) {
+                // Проверяем, не занят ли собеседник
+                isUserInCall(targetUserId).then(isBusy => {
+                    if (isBusy) {
                         showToast('❌ Пользователь уже в звонке');
                         return;
                     }
-                    
                     initiateCall(targetUserId, targetName, video);
                 });
             }).catch(err => {
@@ -4144,6 +4197,8 @@
 
     function initiateCall(targetUserId, targetName, video) {
         console.log('📞 Инициализация звонка для:', targetName);
+        console.log('📞 targetUserId:', targetUserId);
+        console.log('📞 video:', video);
         
         currentCallId = 'call_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
         
@@ -4782,6 +4837,8 @@
     console.log('✅ Предпросмотр ссылок');
     console.log('✅ Настраиваемая высота строки');
     console.log('✅ Исправлена фильтрация сообщений');
+    console.log('✅ Исправлено воспроизведение голосовых');
+    console.log('✅ Исправлены звонки');
     </script>
 </body>
 </html>
