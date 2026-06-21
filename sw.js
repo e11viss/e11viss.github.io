@@ -1,5 +1,5 @@
 // sw.js - Service Worker для PWA
-const CACHE_NAME = 'icq-chat-v1';
+const CACHE_NAME = 'icq-chat-v3';
 const urlsToCache = [
     '/',
     '/index.html',
@@ -11,12 +11,13 @@ self.addEventListener('install', (event) => {
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then((cache) => {
-                console.log('✅ Кеш создан');
+                console.log('✅ Кеш создан, версия:', CACHE_NAME);
                 return cache.addAll(urlsToCache).catch(err => {
                     console.warn('⚠️ Ошибка кеширования:', err);
                 });
             })
     );
+    // Заставляем SW активироваться сразу
     self.skipWaiting();
 });
 
@@ -34,49 +35,62 @@ self.addEventListener('activate', (event) => {
             );
         })
     );
+    // Перехватываем управление сразу
     self.clients.claim();
 });
 
-// Обработка запросов - только для статики, не трогаем API
+// Обработка запросов
 self.addEventListener('fetch', (event) => {
     const url = new URL(event.request.url);
     
-    // Пропускаем Firebase запросы (не кешируем)
+    // ПРОПУСКАЕМ ВСЕ API ЗАПРОСЫ - НЕ КЕШИРУЕМ
+    // Firebase
     if (url.hostname.includes('firebase') || 
         url.hostname.includes('googleapis') ||
-        url.hostname.includes('gstatic.com')) {
-        return event.respondWith(fetch(event.request));
+        url.hostname.includes('gstatic.com') ||
+        url.hostname.includes('firebasestorage') ||
+        url.hostname.includes('identitytoolkit') ||
+        url.hostname.includes('securetoken')) {
+        return; // Просто пропускаем
     }
     
-    // Пропускаем GoFile запросы (не кешируем)
-    if (url.hostname.includes('gofile.io')) {
-        return event.respondWith(fetch(event.request));
+    // GoFile
+    if (url.hostname.includes('gofile.io') || 
+        url.hostname.includes('store1.gofile.io')) {
+        return;
     }
     
-    // Пропускаем WebSocket (не кешируем)
+    // WebSocket
     if (url.protocol === 'wss:' || url.protocol === 'ws:') {
-        return event.respondWith(fetch(event.request));
+        return;
     }
     
-    // Пропускаем API запросы
-    if (url.pathname.includes('/api/') || url.pathname.includes('/v1/')) {
-        return event.respondWith(fetch(event.request));
+    // Любые API запросы
+    if (url.pathname.includes('/api/') || 
+        url.pathname.includes('/v1/') || 
+        url.pathname.includes('/token') ||
+        url.pathname.includes('/accounts')) {
+        return;
     }
     
-    // Только для статических файлов - используем кеш
+    // Только для статических файлов
     event.respondWith(
         caches.match(event.request)
             .then((response) => {
                 if (response) {
                     return response;
                 }
-                return fetch(event.request).catch(() => {
-                    // Если нет интернета, возвращаем index.html
+                return fetch(event.request).catch((err) => {
+                    console.warn('⚠️ Ошибка загрузки:', err);
+                    // Если запрос на страницу и нет интернета - показываем index.html
                     if (event.request.mode === 'navigate') {
                         return caches.match('/index.html');
                     }
-                    // Возвращаем пустой ответ для других запросов
-                    return new Response('', { status: 404, statusText: 'Not Found' });
+                    // Возвращаем пустой ответ
+                    return new Response('', { 
+                        status: 404, 
+                        statusText: 'Not Found' 
+                    });
                 });
             })
     );
