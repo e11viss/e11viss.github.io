@@ -1,12 +1,11 @@
 // sw.js - Service Worker для PWA
-const CACHE_NAME = 'icq-chat-v3';
+const CACHE_NAME = 'icq-chat-v4';
 const urlsToCache = [
     '/',
     '/index.html',
     '/manifest.json'
 ];
 
-// Устанавливаем кеш
 self.addEventListener('install', (event) => {
     event.waitUntil(
         caches.open(CACHE_NAME)
@@ -17,11 +16,9 @@ self.addEventListener('install', (event) => {
                 });
             })
     );
-    // Заставляем SW активироваться сразу
     self.skipWaiting();
 });
 
-// Активация
 self.addEventListener('activate', (event) => {
     event.waitUntil(
         caches.keys().then((cacheNames) => {
@@ -35,37 +32,35 @@ self.addEventListener('activate', (event) => {
             );
         })
     );
-    // Перехватываем управление сразу
     self.clients.claim();
 });
 
-// Обработка запросов
 self.addEventListener('fetch', (event) => {
     const url = new URL(event.request.url);
     
-    // ПРОПУСКАЕМ ВСЕ API ЗАПРОСЫ - НЕ КЕШИРУЕМ
-    // Firebase
+    // Пропускаем все Firebase/Google запросы
     if (url.hostname.includes('firebase') || 
         url.hostname.includes('googleapis') ||
         url.hostname.includes('gstatic.com') ||
         url.hostname.includes('firebasestorage') ||
         url.hostname.includes('identitytoolkit') ||
-        url.hostname.includes('securetoken')) {
-        return; // Просто пропускаем
+        url.hostname.includes('securetoken') ||
+        url.hostname.includes('firebaseio.com')) {
+        return;
     }
     
-    // GoFile
+    // Пропускаем GoFile
     if (url.hostname.includes('gofile.io') || 
         url.hostname.includes('store1.gofile.io')) {
         return;
     }
     
-    // WebSocket
+    // Пропускаем WebSocket
     if (url.protocol === 'wss:' || url.protocol === 'ws:') {
         return;
     }
     
-    // Любые API запросы
+    // Пропускаем API запросы
     if (url.pathname.includes('/api/') || 
         url.pathname.includes('/v1/') || 
         url.pathname.includes('/token') ||
@@ -73,7 +68,7 @@ self.addEventListener('fetch', (event) => {
         return;
     }
     
-    // Только для статических файлов
+    // Только статика
     event.respondWith(
         caches.match(event.request)
             .then((response) => {
@@ -81,16 +76,11 @@ self.addEventListener('fetch', (event) => {
                     return response;
                 }
                 return fetch(event.request).catch((err) => {
-                    console.warn('⚠️ Ошибка загрузки:', err);
-                    // Если запрос на страницу и нет интернета - показываем index.html
+                    console.warn('⚠️ Ошибка загрузки:', err.message);
                     if (event.request.mode === 'navigate') {
                         return caches.match('/index.html');
                     }
-                    // Возвращаем пустой ответ
-                    return new Response('', { 
-                        status: 404, 
-                        statusText: 'Not Found' 
-                    });
+                    return new Response('', { status: 404 });
                 });
             })
     );
