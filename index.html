@@ -689,6 +689,90 @@
             50% { opacity: 1; }
         }
 
+        /* Voice Message Styles */
+        .voice-message {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 4px 0;
+            min-width: 200px;
+            max-width: 350px;
+        }
+        .voice-message .play-btn {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--accent);
+            border: none;
+            color: #fff;
+            font-size: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.2s;
+        }
+        .voice-message .play-btn:hover { transform: scale(1.05); }
+        .voice-message .play-btn:active { transform: scale(0.9); }
+        .voice-message .play-btn.playing {
+            animation: spin 2s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .voice-message .waveform {
+            flex: 1;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            gap: 2px;
+            cursor: pointer;
+            padding: 0 4px;
+        }
+        .voice-message .waveform .bar {
+            width: 3px;
+            background: var(--text-secondary);
+            border-radius: 2px;
+            transition: all 0.3s ease;
+        }
+        .voice-message .waveform .bar.active {
+            background: var(--accent);
+            height: 24px !important;
+            animation: waveActive 0.3s ease;
+        }
+        @keyframes waveActive {
+            0% { height: 6px; }
+            50% { height: 28px; }
+            100% { height: 24px; }
+        }
+        .voice-message .time-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            min-width: 40px;
+            text-align: center;
+            font-variant-numeric: tabular-nums;
+        }
+        .voice-message .speed-btn {
+            background: none;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 2px 8px;
+            font-size: 11px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+            min-height: 28px;
+        }
+        .voice-message .speed-btn:hover { background: var(--bg-hover); }
+        .voice-message .speed-btn.active {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: rgba(10,132,255,0.1);
+        }
+
+        /* Link Preview */
         .link-preview {
             margin: 6px 0;
             border: 1px solid var(--border-color);
@@ -728,65 +812,6 @@
             font-size: 11px;
             color: var(--text-muted);
             margin-top: 4px;
-        }
-
-        .voice-message {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 4px 0;
-            min-width: 200px;
-        }
-        .voice-message .play-btn {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: var(--accent);
-            border: none;
-            color: #fff;
-            font-size: 18px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-        .voice-message .play-btn:hover { transform: scale(1.05); }
-        .voice-message .play-btn:active { transform: scale(0.9); }
-        .voice-message .waveform {
-            flex: 1;
-            height: 30px;
-            display: flex;
-            align-items: center;
-            gap: 2px;
-            cursor: pointer;
-        }
-        .voice-message .waveform .bar {
-            width: 3px;
-            background: var(--text-secondary);
-            border-radius: 2px;
-            transition: height 0.2s, background 0.2s;
-        }
-        .voice-message .waveform .bar.active { background: var(--accent); }
-        .voice-message .time-label {
-            font-size: 12px;
-            color: var(--text-muted);
-            min-width: 40px;
-            text-align: center;
-        }
-        .voice-message .speed-btn {
-            background: none;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 2px 8px;
-            font-size: 11px;
-            color: var(--text-secondary);
-            cursor: pointer;
-        }
-        .voice-message .speed-btn:hover { background: var(--bg-hover); }
-        .voice-message .speed-btn.active {
-            border-color: var(--accent);
-            color: var(--accent);
         }
 
         .reaction-popup {
@@ -953,12 +978,22 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: all 0.2s;
         }
         .input-area .action-btn:hover {
             background: var(--bg-hover);
             transform: scale(1.05);
         }
         .input-area .action-btn:active { transform: scale(0.9); }
+        .input-area .action-btn.recording {
+            background: var(--danger) !important;
+            color: #fff !important;
+            animation: pulse 0.8s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
         .input-area .send-btn {
             background: var(--accent);
             border: none;
@@ -1015,7 +1050,6 @@
         }
         .input-area .emoji-panel span:active { transform: scale(0.9); }
         #fileInput { display: none; }
-        #voiceInput { display: none; }
 
         .new-messages-btn {
             position: absolute;
@@ -1371,6 +1405,7 @@
             font-size: 14px;
             color: var(--text-secondary);
             margin: 4px 0 20px;
+            font-variant-numeric: tabular-nums;
         }
         .call-container .call-actions {
             display: flex;
@@ -1385,17 +1420,18 @@
             border: none;
             font-size: 28px;
             cursor: pointer;
+            transition: all 0.2s;
         }
+        .call-container .call-actions button:hover { transform: scale(1.05); }
+        .call-container .call-actions button:active { transform: scale(0.9); }
         .call-container .call-actions .call-end {
             background: var(--danger);
             color: #fff;
         }
-        .call-container .call-actions .call-end:hover { transform: scale(1.05); }
         .call-container .call-actions .call-mute {
             background: var(--bg-hover);
             color: var(--text-primary);
         }
-        .call-container .call-actions .call-mute:hover { background: var(--bg-active); }
         .call-container .call-actions .call-mute.muted {
             background: var(--danger);
             color: #fff;
@@ -1404,7 +1440,6 @@
             background: var(--bg-hover);
             color: var(--text-primary);
         }
-        .call-container .call-actions .call-video:hover { background: var(--bg-active); }
         .call-container .call-actions .call-video.off {
             background: var(--danger);
             color: #fff;
@@ -1428,12 +1463,6 @@
             object-fit: cover;
             border: 2px solid var(--border-color);
             z-index: 10;
-        }
-        .call-container .call-timer {
-            font-size: 18px;
-            font-weight: 600;
-            color: var(--success);
-            margin: 8px 0;
         }
 
         /* PWA Install Banner */
@@ -1525,10 +1554,13 @@
                 width: 80px;
                 height: 60px;
             }
+            .voice-message { min-width: 150px; max-width: 280px; }
         }
         @media (max-width: 400px) {
             .chat-list-panel { width: 100%; max-width: none; }
             .modal { padding: 16px; }
+            .voice-message { min-width: 120px; max-width: 220px; }
+            .voice-message .waveform .bar { width: 2px; }
         }
         @media (min-width: 769px) {
             .chat-list-panel-overlay { display: none !important; }
@@ -1558,7 +1590,7 @@
         <div class="chat-list-panel" id="chatListPanel">
             <div class="search-bar">
                 <span class="search-icon">🔍</span>
-                <input type="text" id="searchInput" placeholder="Поиск по контактам и сообщениям...">
+                <input type="text" id="searchInput" placeholder="Поиск по контактам и сообщениям..." autocomplete="off">
                 <button class="create-group-btn" id="createGroupBtn">👥 +</button>
             </div>
             <div class="folder-tabs" id="folderTabs">
@@ -1773,6 +1805,7 @@ let currentTab = 'chats';
 let currentFolder = 'all';
 let groups = {};
 let lastMessageForReplies = null;
+let isCallActive = false;
 
 // ============================================================
 // DOM REFS
@@ -2053,11 +2086,14 @@ function toggleReaction(key, emoji) {
 }
 
 // ============================================================
-// ГОЛОСОВЫЕ СООБЩЕНИЯ
+// ГОЛОСОВЫЕ СООБЩЕНИЯ (ИСПРАВЛЕННАЯ ВЕРСИЯ)
 // ============================================================
 let mediaRecorder = null;
 let audioChunks = [];
 let isRecording = false;
+let recordingStartTime = null;
+let recordingTimer = null;
+let recordingDuration = 0;
 
 voiceBtn.addEventListener('click', () => {
     if (isRecording) {
@@ -2069,25 +2105,74 @@ voiceBtn.addEventListener('click', () => {
 
 async function startRecording() {
     try {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        mediaRecorder = new MediaRecorder(stream);
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+            audio: {
+                echoCancellation: true,
+                noiseSuppression: true,
+                autoGainControl: true
+            } 
+        });
+        
+        let mimeType = 'audio/webm';
+        if (!MediaRecorder.isTypeSupported('audio/webm')) {
+            mimeType = 'audio/ogg';
+        }
+        if (!MediaRecorder.isTypeSupported(mimeType)) {
+            mimeType = 'audio/mp4';
+        }
+        
+        mediaRecorder = new MediaRecorder(stream, {
+            mimeType: mimeType,
+            audioBitsPerSecond: 128000
+        });
+        
         audioChunks = [];
+        recordingStartTime = Date.now();
+        recordingDuration = 0;
+        
         mediaRecorder.ondataavailable = event => {
-            audioChunks.push(event.data);
+            if (event.data.size > 0) {
+                audioChunks.push(event.data);
+            }
         };
+        
         mediaRecorder.onstop = () => {
-            const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
-            const file = new File([audioBlob], 'voice.webm', { type: 'audio/webm' });
-            sendVoiceMessage(file);
+            const audioBlob = new Blob(audioChunks, { type: mimeType });
+            const file = new File([audioBlob], 'voice.' + mimeType.split('/')[1], { type: mimeType });
+            sendVoiceMessage(file, recordingDuration);
             stream.getTracks().forEach(track => track.stop());
+            
+            isRecording = false;
+            voiceBtn.textContent = '🎤';
+            voiceBtn.classList.remove('recording');
+            if (recordingTimer) {
+                clearInterval(recordingTimer);
+                recordingTimer = null;
+            }
+            statusDiv.textContent = '✅ Голосовое сообщение записано';
+            statusDiv.className = 'status-bar';
         };
-        mediaRecorder.start();
+        
+        mediaRecorder.start(1000);
         isRecording = true;
         voiceBtn.textContent = '⏹️';
-        voiceBtn.style.color = 'var(--danger)';
+        voiceBtn.classList.add('recording');
+        
+        recordingTimer = setInterval(() => {
+            recordingDuration = Math.floor((Date.now() - recordingStartTime) / 1000);
+            const mins = String(Math.floor(recordingDuration / 60)).padStart(2, '0');
+            const secs = String(recordingDuration % 60).padStart(2, '0');
+            statusDiv.textContent = '🎤 Запись... ' + mins + ':' + secs;
+            statusDiv.className = 'status-bar warning';
+        }, 500);
+        
         showToast('🎤 Запись... Нажмите ещё раз для отправки');
+        
     } catch(err) {
         alert('Не удалось получить доступ к микрофону: ' + err.message);
+        isRecording = false;
+        voiceBtn.textContent = '🎤';
+        voiceBtn.classList.remove('recording');
     }
 }
 
@@ -2095,18 +2180,30 @@ function stopRecording() {
     if (mediaRecorder && isRecording) {
         mediaRecorder.stop();
         isRecording = false;
-        voiceBtn.textContent = '🎤';
-        voiceBtn.style.color = '';
+        voiceBtn.textContent = '⏳';
+        voiceBtn.classList.remove('recording');
+        if (recordingTimer) {
+            clearInterval(recordingTimer);
+            recordingTimer = null;
+        }
+        showToast('⏳ Обработка голосового сообщения...');
     }
 }
 
-async function sendVoiceMessage(file) {
+async function sendVoiceMessage(file, duration) {
     if (!currentUser) return;
+    
+    if (file.size > 10 * 1024 * 1024) {
+        showToast('❌ Голосовое сообщение слишком большое (макс. 10MB)');
+        return;
+    }
+    
     showToast('📤 Загрузка голосового сообщения...');
     try {
         const result = await uploadToGoFile(file);
         const to = currentContact === 'all' ? null : currentContact;
-        messagesRef.push({
+        
+        const payload = {
             name: currentName,
             userId: currentUserId,
             text: result.directLink,
@@ -2114,17 +2211,27 @@ async function sendVoiceMessage(file) {
             fileSize: file.size,
             isFile: true,
             isVoice: true,
-            duration: 30,
+            duration: duration || Math.floor(file.size / 16000),
             to: to,
             timestamp: firebase.database.ServerValue.TIMESTAMP,
             status: 'sending'
-        });
+        };
+        
+        if (currentGroupId) {
+            groupMessagesRef.child(currentGroupId).push(payload);
+        } else {
+            messagesRef.push(payload);
+        }
+        
         showToast('✅ Голосовое сообщение отправлено!');
     } catch(err) {
-        showToast('❌ Ошибка: ' + err.message);
+        showToast('❌ Ошибка загрузки: ' + err.message);
     }
 }
 
+// ============================================================
+// ВОСПРОИЗВЕДЕНИЕ ГОЛОСОВЫХ (ИСПРАВЛЕННАЯ ВЕРСИЯ)
+// ============================================================
 function createVoiceMessageElement(data) {
     const container = document.createElement('div');
     container.className = 'voice-message';
@@ -2136,17 +2243,26 @@ function createVoiceMessageElement(data) {
     
     const waveform = document.createElement('div');
     waveform.className = 'waveform';
-    for (let i = 0; i < 40; i++) {
+    
+    const barCount = 40;
+    const bars = [];
+    for (let i = 0; i < barCount; i++) {
         const bar = document.createElement('div');
         bar.className = 'bar';
-        bar.style.height = (4 + Math.random() * 20) + 'px';
+        const height = 6 + Math.random() * 20;
+        bar.style.height = height + 'px';
         bar.dataset.index = i;
         waveform.appendChild(bar);
+        bars.push(bar);
     }
     
     const timeLabel = document.createElement('span');
     timeLabel.className = 'time-label';
-    timeLabel.textContent = '0:30';
+    const duration = data.duration || 30;
+    const mins = String(Math.floor(duration / 60)).padStart(2, '0');
+    const secs = String(Math.floor(duration % 60)).padStart(2, '0');
+    timeLabel.textContent = mins + ':' + secs;
+    timeLabel.dataset.duration = duration;
     
     const speedBtn = document.createElement('button');
     speedBtn.className = 'speed-btn';
@@ -2156,36 +2272,108 @@ function createVoiceMessageElement(data) {
     let audio = null;
     let isPlaying = false;
     let playSpeed = 1;
+    let progressInterval = null;
+    
+    function updateWaveform(progress) {
+        const count = Math.floor(progress * bars.length);
+        bars.forEach((bar, i) => {
+            bar.classList.toggle('active', i < count);
+        });
+    }
+    
+    function updateTime(currentTime) {
+        const total = parseFloat(timeLabel.dataset.duration) || 30;
+        const remaining = Math.max(0, total - currentTime);
+        const mins = String(Math.floor(remaining / 60)).padStart(2, '0');
+        const secs = String(Math.floor(remaining % 60)).padStart(2, '0');
+        timeLabel.textContent = mins + ':' + secs;
+    }
     
     playBtn.addEventListener('click', () => {
         if (!audio) {
             audio = new Audio(data.text);
+            
+            audio.onloadedmetadata = () => {
+                if (audio.duration && !isNaN(audio.duration)) {
+                    const total = audio.duration;
+                    const mins = String(Math.floor(total / 60)).padStart(2, '0');
+                    const secs = String(Math.floor(total % 60)).padStart(2, '0');
+                    timeLabel.textContent = mins + ':' + secs;
+                    timeLabel.dataset.duration = total;
+                }
+            };
+            
             audio.onended = () => {
                 isPlaying = false;
                 playBtn.textContent = '▶';
+                playBtn.classList.remove('playing');
                 playBtn.dataset.playing = 'false';
-                waveform.querySelectorAll('.bar').forEach(b => b.classList.remove('active'));
+                updateWaveform(1);
+                const total = parseFloat(timeLabel.dataset.duration) || 30;
+                const mins = String(Math.floor(total / 60)).padStart(2, '0');
+                const secs = String(Math.floor(total % 60)).padStart(2, '0');
+                timeLabel.textContent = mins + ':' + secs;
+                if (progressInterval) {
+                    clearInterval(progressInterval);
+                    progressInterval = null;
+                }
+                setTimeout(() => {
+                    bars.forEach(bar => bar.classList.remove('active'));
+                }, 500);
             };
+            
+            audio.onerror = () => {
+                showToast('❌ Ошибка воспроизведения');
+                isPlaying = false;
+                playBtn.textContent = '▶';
+                playBtn.classList.remove('playing');
+                playBtn.dataset.playing = 'false';
+                if (progressInterval) {
+                    clearInterval(progressInterval);
+                    progressInterval = null;
+                }
+            };
+            
             audio.ontimeupdate = () => {
-                const progress = audio.currentTime / audio.duration;
-                const bars = waveform.querySelectorAll('.bar');
-                const count = Math.floor(progress * bars.length);
-                bars.forEach((bar, i) => {
-                    bar.classList.toggle('active', i < count);
-                });
+                if (audio.duration && !isNaN(audio.duration)) {
+                    const progress = audio.currentTime / audio.duration;
+                    updateWaveform(progress);
+                    updateTime(audio.currentTime);
+                }
             };
         }
+        
         if (isPlaying) {
             audio.pause();
             isPlaying = false;
             playBtn.textContent = '▶';
+            playBtn.classList.remove('playing');
             playBtn.dataset.playing = 'false';
+            if (progressInterval) {
+                clearInterval(progressInterval);
+                progressInterval = null;
+            }
         } else {
             audio.playbackRate = playSpeed;
-            audio.play().catch(() => {});
+            audio.play().catch((err) => {
+                console.error('Audio play error:', err);
+                showToast('❌ Ошибка воспроизведения');
+            });
             isPlaying = true;
             playBtn.textContent = '⏸';
+            playBtn.classList.add('playing');
             playBtn.dataset.playing = 'true';
+            
+            if (progressInterval) {
+                clearInterval(progressInterval);
+            }
+            progressInterval = setInterval(() => {
+                if (audio && audio.duration && !isNaN(audio.duration)) {
+                    const progress = audio.currentTime / audio.duration;
+                    updateWaveform(progress);
+                    updateTime(audio.currentTime);
+                }
+            }, 100);
         }
     });
     
@@ -3066,14 +3254,12 @@ function createMessageRow(key, data) {
         });
     }
     
-    // Preview
     if (data.previews && data.previews.length > 0) {
         data.previews.forEach(preview => {
             textDiv.appendChild(createLinkPreviewElement(preview));
         });
     }
     
-    // Reactions
     if (data.reactions) {
         const reactionsContainer = document.createElement('div');
         reactionsContainer.className = 'reactions';
@@ -3110,13 +3296,11 @@ function createMessageRow(key, data) {
     bubble.appendChild(timeStatusWrap);
     row.appendChild(bubble);
     
-    // Double click for reactions
     row.addEventListener('dblclick', (e) => {
         e.stopPropagation();
         showReactionPopup(key, data, e);
     });
     
-    // Context menu
     row.addEventListener('contextmenu', (e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -3462,6 +3646,8 @@ function showSettingsModal() {
 
 function generateSettingsHTML(avatarUrl) {
     const avatarStyle = avatarUrl ? `background-image:url(${avatarUrl});background-size:cover;background-position:center;` : '';
+    const isPwaInstalled = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    
     return `
         <div class="modal-header">
             <h2>⚙️ Настройки</h2>
@@ -3506,6 +3692,23 @@ function generateSettingsHTML(avatarUrl) {
                 <div class="slider" style="transform:${currentTheme === 'dark' ? 'translateX(20px)' : 'translateX(0)'};"></div>
             </div>
         </div>
+        ${!isPwaInstalled ? `
+        <div class="setting-item">
+            <div>
+                <div class="label">📱 Установить приложение</div>
+                <div class="desc">Добавьте ICQ-чат на рабочий стол</div>
+            </div>
+            <button id="installPwaBtn" style="background:var(--accent);color:#fff;border:none;border-radius:12px;padding:8px 16px;font-size:13px;cursor:pointer;min-height:44px;">Установить</button>
+        </div>
+        ` : `
+        <div class="setting-item">
+            <div>
+                <div class="label">✅ Приложение установлено</div>
+                <div class="desc">ICQ-чат уже на вашем рабочем столе</div>
+            </div>
+            <span style="font-size:24px;">🎉</span>
+        </div>
+        `}
         <div class="setting-item" style="flex-direction:column;align-items:stretch;">
             <div class="label">Горячие клавиши</div>
             <div class="shortcuts-list">
@@ -3575,6 +3778,18 @@ function setupSettingsHandlers() {
         logoutModalBtn.addEventListener('click', () => {
             closeModal();
             auth.signOut();
+        });
+    }
+    const installPwaBtn = document.getElementById('installPwaBtn');
+    if (installPwaBtn) {
+        installPwaBtn.addEventListener('click', () => {
+            showPwaBanner();
+            closeModal();
+            setTimeout(() => {
+                if (!pwaBanner.classList.contains('active')) {
+                    showToast('📱 Нажмите на меню браузера → "Установить приложение"');
+                }
+            }, 500);
         });
     }
 }
@@ -3676,7 +3891,7 @@ chatBackBtn.addEventListener('click', () => {
 chatListOverlay.addEventListener('click', closeChatList);
 
 // ============================================================
-// WEBRTC ЗВОНКИ
+// WEBRTC ЗВОНКИ (ИСПРАВЛЕННАЯ ВЕРСИЯ)
 // ============================================================
 let localStream = null;
 let remoteStream = null;
@@ -3704,74 +3919,148 @@ const rtcConfiguration = {
 };
 
 function initCallListener() {
-    if (!currentUserId) return;
+    if (!currentUserId) {
+        console.warn('⚠️ Нет userId для инициализации звонков');
+        return;
+    }
+    
     const callsRef = db.ref('calls/' + sanitizeKey(currentUserId));
+    callsRef.off();
+    
     callsRef.on('child_added', (snapshot) => {
         const data = snapshot.val();
         if (!data) return;
         if (data.callerId === currentUserId) return;
         if (data.status === 'ended' || data.status === 'declined') return;
+        
+        console.log('📞 Входящий звонок от:', data.caller);
         showIncomingCall(data, snapshot.key);
     });
+    
+    callsRef.once('value', (snapshot) => {
+        const data = snapshot.val() || {};
+        Object.keys(data).forEach(key => {
+            const call = data[key];
+            if (call.status === 'ended' || call.status === 'declined') {
+                db.ref('calls/' + sanitizeKey(currentUserId) + '/' + key).remove();
+            }
+        });
+    });
+    
+    console.log('✅ Слушатель звонков инициализирован');
 }
 
 function startCall(contactName, video = false) {
     if (!currentUser) { showToast('❌ Войдите в систему'); return; }
     if (!currentUserId) { showToast('❌ Ошибка идентификации'); return; }
+    if (isCallActive) { showToast('❌ Вы уже в звонке'); return; }
     
-    usersRef.orderByChild('name').equalTo(contactName).once('value').then(snap => {
-        let targetUserId = null;
-        let targetName = null;
-        snap.forEach(childSnap => {
-            targetUserId = childSnap.key;
-            targetName = childSnap.val().name;
-        });
-        if (!targetUserId) { showToast('❌ Пользователь не найден'); return; }
-        if (targetUserId === currentUser.uid) { showToast('❌ Нельзя позвонить самому себе'); return; }
+    const callsRef = db.ref('calls/' + sanitizeKey(currentUserId));
+    callsRef.once('value', (snap) => {
+        const data = snap.val() || {};
+        const activeCall = Object.values(data).find(c => 
+            c.status === 'calling' || c.status === 'answered' || c.status === 'connected'
+        );
+        if (activeCall) {
+            showToast('❌ У вас уже есть активный звонок');
+            return;
+        }
         
-        db.ref('calls/' + sanitizeKey(targetUserId)).once('value').then(snap => {
-            const data = snap.val() || {};
-            const activeCall = Object.values(data).find(c => 
-                c.status === 'calling' || c.status === 'answered' || c.status === 'connected'
-            );
-            if (activeCall) { showToast('❌ Пользователь уже в звонке'); return; }
-            initiateCall(targetUserId, targetName, video);
+        usersRef.orderByChild('name').equalTo(contactName).once('value').then(snap => {
+            let targetUserId = null;
+            let targetName = null;
+            snap.forEach(childSnap => {
+                targetUserId = childSnap.key;
+                targetName = childSnap.val().name;
+            });
+            
+            if (!targetUserId) {
+                showToast('❌ Пользователь не найден');
+                return;
+            }
+            
+            if (targetUserId === currentUser.uid) {
+                showToast('❌ Нельзя позвонить самому себе');
+                return;
+            }
+            
+            db.ref('calls/' + sanitizeKey(targetUserId)).once('value').then(snap => {
+                const data = snap.val() || {};
+                const activeCall = Object.values(data).find(c => 
+                    c.status === 'calling' || c.status === 'answered' || c.status === 'connected'
+                );
+                if (activeCall) {
+                    showToast('❌ Пользователь уже в звонке');
+                    return;
+                }
+                
+                initiateCall(targetUserId, targetName, video);
+            });
+        }).catch(err => {
+            console.error('Error finding user:', err);
+            showToast('❌ Ошибка поиска пользователя');
         });
-    }).catch(err => showToast('❌ Ошибка: ' + err.message));
+    });
 }
 
 function initiateCall(targetUserId, targetName, video) {
+    console.log('📞 Инициализация звонка для:', targetName);
+    
     currentCallId = 'call_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
-    peerConnection = new RTCPeerConnection(rtcConfiguration);
+    
+    try {
+        peerConnection = new RTCPeerConnection(rtcConfiguration);
+    } catch (err) {
+        console.error('❌ Ошибка создания PeerConnection:', err);
+        showToast('❌ Ошибка соединения');
+        return;
+    }
     
     navigator.mediaDevices.getUserMedia({ audio: true, video: video })
         .then(stream => {
             localStream = stream;
+            isCallActive = true;
+            
             stream.getTracks().forEach(track => {
                 peerConnection.addTrack(track, stream);
             });
+            
             showCallUI(targetName, 'Звонок...', video);
             
             peerConnection.onicecandidate = (event) => {
                 if (event.candidate) {
-                    db.ref('calls/' + sanitizeKey(targetUserId) + '/' + currentCallId + '/candidates').push({
-                        candidate: event.candidate.candidate,
-                        sdpMid: event.candidate.sdpMid,
-                        sdpMLineIndex: event.candidate.sdpMLineIndex
-                    });
+                    console.log('🧊 ICE кандидат отправлен');
+                    db.ref('calls/' + sanitizeKey(targetUserId) + '/' + currentCallId + '/candidates')
+                        .push({
+                            candidate: event.candidate.candidate,
+                            sdpMid: event.candidate.sdpMid,
+                            sdpMLineIndex: event.candidate.sdpMLineIndex
+                        })
+                        .catch(err => console.error('Ошибка отправки кандидата:', err));
                 }
             };
             
             peerConnection.ontrack = (event) => {
+                console.log('📹 Получен удаленный поток');
                 remoteStream = event.streams[0];
                 showRemoteVideo(remoteStream);
                 document.getElementById('callStatus').textContent = 'В разговоре';
                 startCallTimer();
             };
             
+            peerConnection.oniceconnectionstatechange = () => {
+                const state = peerConnection.iceConnectionState;
+                console.log('🔗 ICE состояние:', state);
+                if (state === 'failed' || state === 'disconnected') {
+                    showToast('❌ Соединение потеряно');
+                    endCall();
+                }
+            };
+            
             peerConnection.createOffer()
                 .then(offer => peerConnection.setLocalDescription(offer))
                 .then(() => {
+                    console.log('📤 Offer создан');
                     const callData = {
                         caller: currentName,
                         callerId: currentUserId,
@@ -3785,23 +4074,33 @@ function initiateCall(targetUserId, targetName, video) {
                         },
                         timestamp: firebase.database.ServerValue.TIMESTAMP
                     };
-                    db.ref('calls/' + sanitizeKey(targetUserId) + '/' + currentCallId).set(callData);
-                    
+                    return db.ref('calls/' + sanitizeKey(targetUserId) + '/' + currentCallId).set(callData);
+                })
+                .then(() => {
+                    console.log('✅ Offer отправлен');
                     const callRef = db.ref('calls/' + sanitizeKey(targetUserId) + '/' + currentCallId);
                     callRef.on('value', (snap) => {
                         const data = snap.val();
                         if (!data) return;
+                        
                         if (data.status === 'answered' && data.answer) {
-                            const answer = new RTCSessionDescription({
-                                sdp: data.answer.sdp,
-                                type: data.answer.type
-                            });
-                            peerConnection.setRemoteDescription(answer);
-                            document.getElementById('callStatus').textContent = 'Соединение...';
+                            console.log('📥 Получен Answer');
+                            try {
+                                const answer = new RTCSessionDescription({
+                                    sdp: data.answer.sdp,
+                                    type: data.answer.type
+                                });
+                                peerConnection.setRemoteDescription(answer);
+                                document.getElementById('callStatus').textContent = 'Соединение...';
+                            } catch (err) {
+                                console.error('Ошибка установки Answer:', err);
+                            }
                         } else if (data.status === 'declined') {
+                            console.log('📞 Звонок отклонён');
                             endCall();
                             showToast('📞 Звонок отклонён');
                         } else if (data.status === 'ended') {
+                            console.log('📞 Звонок завершён');
                             endCall();
                         }
                     });
@@ -3809,26 +4108,39 @@ function initiateCall(targetUserId, targetName, video) {
                     const candidatesRef = db.ref('calls/' + sanitizeKey(targetUserId) + '/' + currentCallId + '/candidates');
                     candidatesRef.on('child_added', (snap) => {
                         const data = snap.val();
-                        if (data && peerConnection) {
-                            const candidate = new RTCIceCandidate({
-                                candidate: data.candidate,
-                                sdpMid: data.sdpMid,
-                                sdpMLineIndex: data.sdpMLineIndex
-                            });
-                            peerConnection.addIceCandidate(candidate).catch(() => {});
+                        if (data && peerConnection && peerConnection.remoteDescription) {
+                            try {
+                                const candidate = new RTCIceCandidate({
+                                    candidate: data.candidate,
+                                    sdpMid: data.sdpMid,
+                                    sdpMLineIndex: data.sdpMLineIndex
+                                });
+                                peerConnection.addIceCandidate(candidate);
+                                console.log('🧊 ICE кандидат добавлен');
+                            } catch (err) {
+                                console.error('Ошибка добавления ICE кандидата:', err);
+                            }
                         }
                     });
+                })
+                .catch(err => {
+                    console.error('❌ Ошибка при отправке offer:', err);
+                    showToast('❌ Ошибка соединения');
+                    endCall();
                 });
         })
         .catch(err => {
-            showToast('❌ Нет доступа к микрофону/камере: ' + err.message);
+            console.error('❌ Нет доступа к медиа:', err);
+            showToast('❌ Нет доступа к микрофону/камере');
             hideCallUI();
+            isCallActive = false;
         });
 }
 
 function showIncomingCall(data, callKey) {
     const caller = data.caller || 'Неизвестный';
     const isVideo = data.video || false;
+    
     window._incomingCallKey = callKey;
     window._incomingCallData = data;
     
@@ -3847,30 +4159,46 @@ function showIncomingCall(data, callKey) {
 
 function answerCall() {
     closeModal();
+    
     const callKey = window._incomingCallKey;
     const data = window._incomingCallData;
-    if (!data || !callKey) return;
+    if (!data || !callKey) {
+        showToast('❌ Звонок уже завершён');
+        return;
+    }
     
     currentCallId = callKey;
     const isVideo = data.video || false;
     const caller = data.caller || 'Собеседник';
-    peerConnection = new RTCPeerConnection(rtcConfiguration);
+    
+    try {
+        peerConnection = new RTCPeerConnection(rtcConfiguration);
+    } catch (err) {
+        console.error('❌ Ошибка создания PeerConnection:', err);
+        showToast('❌ Ошибка соединения');
+        return;
+    }
+    
+    isCallActive = true;
     
     navigator.mediaDevices.getUserMedia({ audio: true, video: isVideo })
         .then(stream => {
             localStream = stream;
+            
             stream.getTracks().forEach(track => {
                 peerConnection.addTrack(track, stream);
             });
+            
             showCallUI(caller, 'Соединение...', isVideo);
             
             peerConnection.onicecandidate = (event) => {
                 if (event.candidate) {
-                    db.ref('calls/' + sanitizeKey(currentUserId) + '/' + callKey + '/candidates').push({
-                        candidate: event.candidate.candidate,
-                        sdpMid: event.candidate.sdpMid,
-                        sdpMLineIndex: event.candidate.sdpMLineIndex
-                    });
+                    db.ref('calls/' + sanitizeKey(currentUserId) + '/' + callKey + '/candidates')
+                        .push({
+                            candidate: event.candidate.candidate,
+                            sdpMid: event.candidate.sdpMid,
+                            sdpMLineIndex: event.candidate.sdpMLineIndex
+                        });
                 }
             };
             
@@ -3879,6 +4207,15 @@ function answerCall() {
                 showRemoteVideo(remoteStream);
                 document.getElementById('callStatus').textContent = 'В разговоре';
                 startCallTimer();
+            };
+            
+            peerConnection.oniceconnectionstatechange = () => {
+                const state = peerConnection.iceConnectionState;
+                console.log('🔗 ICE состояние:', state);
+                if (state === 'failed' || state === 'disconnected') {
+                    showToast('❌ Соединение потеряно');
+                    endCall();
+                }
             };
             
             const offer = new RTCSessionDescription({
@@ -3890,93 +4227,143 @@ function answerCall() {
                 .then(() => peerConnection.createAnswer())
                 .then(answer => peerConnection.setLocalDescription(answer))
                 .then(() => {
-                    db.ref('calls/' + sanitizeKey(currentUserId) + '/' + callKey).update({
-                        status: 'answered',
-                        answer: {
-                            sdp: peerConnection.localDescription.sdp,
-                            type: peerConnection.localDescription.type
-                        }
-                    });
+                    return db.ref('calls/' + sanitizeKey(currentUserId) + '/' + callKey)
+                        .update({
+                            status: 'answered',
+                            answer: {
+                                sdp: peerConnection.localDescription.sdp,
+                                type: peerConnection.localDescription.type
+                            }
+                        });
+                })
+                .then(() => {
+                    console.log('✅ Answer отправлен');
+                })
+                .catch(err => {
+                    console.error('❌ Ошибка answer:', err);
+                    showToast('❌ Ошибка соединения');
+                    endCall();
                 });
             
             const candidatesRef = db.ref('calls/' + sanitizeKey(currentUserId) + '/' + callKey + '/candidates');
             candidatesRef.on('child_added', (snap) => {
                 const data = snap.val();
                 if (data && peerConnection) {
-                    const candidate = new RTCIceCandidate({
-                        candidate: data.candidate,
-                        sdpMid: data.sdpMid,
-                        sdpMLineIndex: data.sdpMLineIndex
-                    });
-                    peerConnection.addIceCandidate(candidate).catch(() => {});
+                    try {
+                        const candidate = new RTCIceCandidate({
+                            candidate: data.candidate,
+                            sdpMid: data.sdpMid,
+                            sdpMLineIndex: data.sdpMLineIndex
+                        });
+                        peerConnection.addIceCandidate(candidate);
+                    } catch (err) {
+                        console.error('Ошибка добавления ICE кандидата:', err);
+                    }
                 }
             });
         })
         .catch(err => {
-            showToast('❌ Нет доступа к микрофону/камере: ' + err.message);
+            console.error('❌ Нет доступа к медиа:', err);
+            showToast('❌ Нет доступа к микрофону/камере');
             hideCallUI();
+            isCallActive = false;
         });
 }
 
 function declineCall() {
     closeModal();
+    
     const callKey = window._incomingCallKey;
     if (callKey && currentUserId) {
-        db.ref('calls/' + sanitizeKey(currentUserId) + '/' + callKey).update({ status: 'declined' });
-        setTimeout(() => {
-            db.ref('calls/' + sanitizeKey(currentUserId) + '/' + callKey).remove();
-        }, 3000);
+        db.ref('calls/' + sanitizeKey(currentUserId) + '/' + callKey)
+            .update({ status: 'declined' })
+            .then(() => {
+                setTimeout(() => {
+                    db.ref('calls/' + sanitizeKey(currentUserId) + '/' + callKey).remove();
+                }, 3000);
+            })
+            .catch(err => console.error('Ошибка отклонения:', err));
     }
     showToast('📞 Звонок отклонён');
 }
 
 function endCall() {
-    if (peerConnection) { peerConnection.close(); peerConnection = null; }
-    if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
-    if (remoteStream) { remoteStream.getTracks().forEach(t => t.stop()); remoteStream = null; }
-    stopCallTimer();
-    if (currentCallId && currentUserId) {
-        db.ref('calls/' + sanitizeKey(currentUserId) + '/' + currentCallId).update({ status: 'ended' });
-        setTimeout(() => {
-            db.ref('calls/' + sanitizeKey(currentUserId) + '/' + currentCallId).remove();
-        }, 3000);
+    if (peerConnection) {
+        peerConnection.close();
+        peerConnection = null;
     }
+    if (localStream) {
+        localStream.getTracks().forEach(t => t.stop());
+        localStream = null;
+    }
+    if (remoteStream) {
+        remoteStream.getTracks().forEach(t => t.stop());
+        remoteStream = null;
+    }
+    
+    isCallActive = false;
+    stopCallTimer();
+    
+    if (currentCallId && currentUserId) {
+        const path = 'calls/' + sanitizeKey(currentUserId) + '/' + currentCallId;
+        db.ref(path).update({ status: 'ended' })
+            .then(() => {
+                setTimeout(() => {
+                    db.ref(path).remove().catch(() => {});
+                }, 3000);
+            })
+            .catch(() => {});
+    }
+    
     hideCallUI();
     showToast('📞 Звонок завершён');
 }
 
 function showCallUI(contactName, status, video = false) {
     const overlay = document.getElementById('callOverlay');
+    if (!overlay) return;
+    
     document.getElementById('callName').textContent = contactName;
     document.getElementById('callStatus').textContent = status;
     document.getElementById('callAvatar').textContent = video ? '📹' : '📞';
+    
     const container = document.getElementById('callVideoContainer');
-    container.innerHTML = '';
-    if (video && localStream) {
-        const localVideo = document.createElement('video');
-        localVideo.className = 'local-video';
-        localVideo.autoplay = true;
-        localVideo.muted = true;
-        localVideo.srcObject = localStream;
-        container.appendChild(localVideo);
+    if (container) {
+        container.innerHTML = '';
+        if (video && localStream) {
+            const localVideo = document.createElement('video');
+            localVideo.className = 'local-video';
+            localVideo.autoplay = true;
+            localVideo.muted = true;
+            localVideo.srcObject = localStream;
+            container.appendChild(localVideo);
+        }
     }
+    
     overlay.classList.add('active');
 }
 
 function showRemoteVideo(stream) {
     const container = document.getElementById('callVideoContainer');
+    if (!container) return;
+    
     const existing = container.querySelector('.remote-video');
     if (existing) existing.remove();
+    
     const video = document.createElement('video');
     video.className = 'remote-video';
     video.autoplay = true;
     video.srcObject = stream;
+    video.style.cssText = 'width:100%;max-height:300px;border-radius:12px;background:#000;margin:8px 0;object-fit:cover;';
     container.prepend(video);
 }
 
 function hideCallUI() {
-    document.getElementById('callOverlay').classList.remove('active');
-    document.getElementById('callVideoContainer').innerHTML = '';
+    const overlay = document.getElementById('callOverlay');
+    if (overlay) overlay.classList.remove('active');
+    
+    const container = document.getElementById('callVideoContainer');
+    if (container) container.innerHTML = '';
 }
 
 function startCallTimer() {
@@ -3987,15 +4374,21 @@ function startCallTimer() {
         const mins = String(Math.floor(elapsed / 60)).padStart(2, '0');
         const secs = String(elapsed % 60).padStart(2, '0');
         const timerEl = document.getElementById('callStatus');
-        if (timerEl) timerEl.textContent = '⏱ ' + mins + ':' + secs;
+        if (timerEl) {
+            timerEl.textContent = '⏱ ' + mins + ':' + secs;
+        }
     }, 1000);
 }
 
 function stopCallTimer() {
-    if (callTimerInterval) { clearInterval(callTimerInterval); callTimerInterval = null; }
+    if (callTimerInterval) {
+        clearInterval(callTimerInterval);
+        callTimerInterval = null;
+    }
     callStartTime = null;
 }
 
+// Кнопки звонков
 voiceCallBtn.addEventListener('click', () => {
     if (currentContact === 'all' || currentContact.startsWith('group_')) {
         showToast('📞 Звонок доступен только для личных чатов');
@@ -4022,6 +4415,8 @@ document.getElementById('callMuteBtn').addEventListener('click', function() {
         });
         this.classList.toggle('muted');
         this.textContent = audioTracks[0]?.enabled ? '🔊' : '🔇';
+        this.style.background = audioTracks[0]?.enabled ? 'var(--bg-hover)' : 'var(--danger)';
+        this.style.color = audioTracks[0]?.enabled ? 'var(--text-primary)' : '#fff';
     }
 });
 
@@ -4033,6 +4428,8 @@ document.getElementById('callVideoBtn').addEventListener('click', function() {
         });
         this.classList.toggle('off');
         this.textContent = videoTracks[0]?.enabled ? '📹' : '🚫';
+        this.style.background = videoTracks[0]?.enabled ? 'var(--bg-hover)' : 'var(--danger)';
+        this.style.color = videoTracks[0]?.enabled ? 'var(--text-primary)' : '#fff';
     }
 });
 
@@ -4040,33 +4437,88 @@ document.getElementById('callVideoBtn').addEventListener('click', function() {
 // PWA INSTALL
 // ============================================================
 let deferredPrompt = null;
+let isPwaInstalled = false;
+
+if (window.matchMedia('(display-mode: standalone)').matches || 
+    window.navigator.standalone === true) {
+    isPwaInstalled = true;
+    pwaBanner.classList.remove('active');
+}
 
 window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
-    pwaBanner.classList.add('active');
+    
+    if (!isPwaInstalled && localStorage.getItem('pwaBannerClosed') !== 'true') {
+        setTimeout(() => {
+            pwaBanner.classList.add('active');
+        }, 2000);
+    }
 });
 
 document.getElementById('pwaInstallBtn')?.addEventListener('click', async () => {
     if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const result = await deferredPrompt.userChoice;
-        if (result.outcome === 'accepted') {
-            console.log('✅ PWA установлено');
-            pwaBanner.classList.remove('active');
+        try {
+            deferredPrompt.prompt();
+            const result = await deferredPrompt.userChoice;
+            if (result.outcome === 'accepted') {
+                isPwaInstalled = true;
+                pwaBanner.classList.remove('active');
+                showToast('🎉 Приложение установлено!');
+            } else {
+                pwaBanner.classList.remove('active');
+            }
+            deferredPrompt = null;
+        } catch (err) {
+            console.error('Install error:', err);
+            showInstallInstructions();
         }
-        deferredPrompt = null;
+    } else {
+        showInstallInstructions();
     }
 });
 
 document.getElementById('pwaCloseBtn')?.addEventListener('click', () => {
     pwaBanner.classList.remove('active');
+    localStorage.setItem('pwaBannerClosed', 'true');
 });
 
 window.addEventListener('appinstalled', () => {
-    console.log('✅ Приложение установлено!');
+    isPwaInstalled = true;
     pwaBanner.classList.remove('active');
+    showToast('🎉 Приложение установлено!');
 });
+
+function showInstallInstructions() {
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (isMobile) {
+        let instructions = '';
+        if (/Android/i.test(navigator.userAgent)) {
+            instructions = '1. Нажмите на меню (⋮) в правом верхнем углу\n' +
+                          '2. Выберите "Установить приложение"\n' +
+                          '3. Нажмите "Установить"';
+        } else if (/iPhone|iPad|iPod/i.test(navigator.userAgent)) {
+            instructions = '1. Нажмите на кнопку "Поделиться" (⬆)\n' +
+                          '2. Прокрутите вниз и выберите "На экран «Домой»"\n' +
+                          '3. Нажмите "Добавить"';
+        }
+        alert('📱 Как установить ICQ-чат:\n\n' + instructions);
+    } else {
+        alert('📱 Откройте это приложение на мобильном устройстве\n' +
+              'для установки PWA версии');
+    }
+}
+
+function showPwaBanner() {
+    if (deferredPrompt && !isPwaInstalled) {
+        pwaBanner.classList.add('active');
+        localStorage.removeItem('pwaBannerClosed');
+    } else if (isPwaInstalled) {
+        showToast('✅ Приложение уже установлено');
+    } else {
+        showInstallInstructions();
+    }
+}
 
 // ============================================================
 // SERVICE WORKER
@@ -4195,6 +4647,9 @@ console.log('🚀 ICQ-чат v6.0 запущен!');
 console.log('✅ Все функции интегрированы');
 console.log('✅ Аудио/видео звонки через WebRTC + Firebase');
 console.log('✅ PWA поддержка (установка на рабочий стол)');
+console.log('✅ Голосовые сообщения с анимацией');
+console.log('✅ Умные ответы');
+console.log('✅ Предпросмотр ссылок');
 </script>
 </body>
 </html>
