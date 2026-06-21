@@ -1,5 +1,5 @@
 // sw.js - Service Worker для PWA
-const CACHE_NAME = 'icq-chat-v4';
+const CACHE_NAME = 'icq-chat-v5';
 const urlsToCache = [
     '/',
     '/index.html',
@@ -38,7 +38,7 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
     const url = new URL(event.request.url);
     
-    // Пропускаем все Firebase/Google запросы
+    // Пропускаем Firebase и Google запросы
     if (url.hostname.includes('firebase') || 
         url.hostname.includes('googleapis') ||
         url.hostname.includes('gstatic.com') ||
@@ -64,7 +64,8 @@ self.addEventListener('fetch', (event) => {
     if (url.pathname.includes('/api/') || 
         url.pathname.includes('/v1/') || 
         url.pathname.includes('/token') ||
-        url.pathname.includes('/accounts')) {
+        url.pathname.includes('/accounts') ||
+        url.pathname.includes('/call')) {
         return;
     }
     
