@@ -41,24 +41,29 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
     const url = new URL(event.request.url);
     
-    // Пропускаем Firebase запросы
+    // Пропускаем Firebase запросы (не кешируем)
     if (url.hostname.includes('firebase') || 
         url.hostname.includes('googleapis') ||
         url.hostname.includes('gstatic.com')) {
         return event.respondWith(fetch(event.request));
     }
     
-    // Пропускаем GoFile запросы
+    // Пропускаем GoFile запросы (не кешируем)
     if (url.hostname.includes('gofile.io')) {
         return event.respondWith(fetch(event.request));
     }
     
-    // Пропускаем WebSocket
+    // Пропускаем WebSocket (не кешируем)
     if (url.protocol === 'wss:' || url.protocol === 'ws:') {
         return event.respondWith(fetch(event.request));
     }
     
-    // Только для статических файлов
+    // Пропускаем API запросы
+    if (url.pathname.includes('/api/') || url.pathname.includes('/v1/')) {
+        return event.respondWith(fetch(event.request));
+    }
+    
+    // Только для статических файлов - используем кеш
     event.respondWith(
         caches.match(event.request)
             .then((response) => {
@@ -70,6 +75,8 @@ self.addEventListener('fetch', (event) => {
                     if (event.request.mode === 'navigate') {
                         return caches.match('/index.html');
                     }
+                    // Возвращаем пустой ответ для других запросов
+                    return new Response('', { status: 404, statusText: 'Not Found' });
                 });
             })
     );
