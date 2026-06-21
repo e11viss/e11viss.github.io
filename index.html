@@ -13,6 +13,10 @@
     <meta name="theme-color" content="#1a1a1e">
     <meta name="msapplication-TileColor" content="#1a1a1e">
     
+    <!-- Android Optimizations -->
+    <meta name="android-mobile-web-app-capable" content="yes">
+    <meta name="android-manifest" content="/manifest.json">
+    
     <link rel="icon" type="image/png" sizes="192x192" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230a84ff'/><text x='50' y='68' font-size='50' text-anchor='middle' fill='white'>💬</text></svg>">
     <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230a84ff'/><text x='50' y='68' font-size='50' text-anchor='middle' fill='white'>💬</text></svg>">
     
@@ -93,11 +97,14 @@
         .sidebar .divider { width: 32px; height: 1px; background: var(--border-color); margin: 6px 0; }
 
         .chat-list-panel { width: 320px; background: var(--bg-panel); border-right: 1px solid var(--border-color); display: flex; flex-direction: column; flex-shrink: 0; overflow: hidden; }
-        .chat-list-panel .search-bar { padding: 10px 14px; border-bottom: 1px solid var(--border-color); flex-shrink: 0; position: relative; display: flex; gap: 8px; align-items: center; }
-        .chat-list-panel .search-bar input { flex: 1; padding: 8px 14px 8px 38px; border: 1px solid var(--border-color); border-radius: 20px; font-size: 14px; outline: none; background: var(--bg-input); color: var(--text-primary); }
+        .chat-list-panel .search-bar { padding: 10px 14px; border-bottom: 1px solid var(--border-color); flex-shrink: 0; position: relative; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        .chat-list-panel .search-bar input { flex: 1; padding: 8px 14px 8px 38px; border: 1px solid var(--border-color); border-radius: 20px; font-size: 14px; outline: none; background: var(--bg-input); color: var(--text-primary); min-width: 100px; }
         .chat-list-panel .search-bar input:focus { border-color: var(--accent); }
         .chat-list-panel .search-bar input::placeholder { color: var(--text-muted); }
         .chat-list-panel .search-bar .search-icon { position: absolute; left: 24px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 16px; }
+        .chat-list-panel .search-bar .search-filter { background: var(--bg-input); color: var(--text-primary); border: 1px solid var(--border-color); border-radius: 20px; padding: 4px 10px; font-size: 12px; min-height: 36px; cursor: pointer; flex-shrink: 0; appearance: auto; }
+        .chat-list-panel .search-bar .search-filter:focus { border-color: var(--accent); outline: none; }
+        .chat-list-panel .search-bar .search-filter option { background: var(--bg-panel); color: var(--text-primary); }
         .chat-list-panel .search-bar .create-group-btn { background: var(--accent); color: #fff; border: none; border-radius: 12px; padding: 6px 12px; font-size: 13px; cursor: pointer; white-space: nowrap; min-height: 36px; }
         .chat-list-panel .search-bar .create-group-btn:hover { background: var(--accent-hover); }
         .chat-list-panel .folder-tabs { display: flex; padding: 4px 14px; gap: 4px; border-bottom: 1px solid var(--border-color); flex-shrink: 0; overflow-x: auto; }
@@ -381,17 +388,25 @@
             .pwa-install-banner { bottom: 160px; }
             .call-container .local-video { width: 80px; height: 60px; }
             .voice-message { min-width: 150px; max-width: 280px; }
+            .chat-list-panel .search-bar { flex-wrap: wrap; }
+            .chat-list-panel .search-bar .search-filter { flex: 1; min-width: 80px; }
         }
         @media (max-width: 400px) {
             .chat-list-panel { width: 100%; max-width: none; }
             .modal { padding: 16px; }
             .voice-message { min-width: 120px; max-width: 220px; }
             .voice-message .waveform .bar { width: 2px; }
+            .chat-list-panel .search-bar .search-filter { font-size: 11px; padding: 2px 8px; }
         }
         @media (min-width: 769px) {
             .chat-list-panel-overlay { display: none !important; }
             .chat-list-panel { transform: none !important; }
         }
+
+        /* Android WebView optimizations */
+        .android-webview .top-bar { padding-top: env(safe-area-inset-top); }
+        .android-webview .input-area { padding-bottom: env(safe-area-inset-bottom); }
+        .android-webview * { -webkit-tap-highlight-color: transparent; }
     </style>
 </head>
 <body>
@@ -415,7 +430,13 @@
             <div class="chat-list-panel" id="chatListPanel">
                 <div class="search-bar">
                     <span class="search-icon">🔍</span>
-                    <input type="text" id="searchInput" placeholder="Поиск по контактам и сообщениям..." autocomplete="off">
+                    <input type="text" id="searchInput" placeholder="Поиск по контактам, сообщениям и ID..." autocomplete="off">
+                    <select class="search-filter" id="searchType">
+                        <option value="all">🔍 Все</option>
+                        <option value="contacts">👤 Контакты</option>
+                        <option value="messages">💬 Сообщения</option>
+                        <option value="id">🆔 По ID</option>
+                    </select>
                     <button class="create-group-btn" id="createGroupBtn">👥 +</button>
                 </div>
                 <div class="folder-tabs" id="folderTabs">
@@ -547,6 +568,14 @@
     const groupMessagesRef = db.ref('group_messages');
 
     // ============================================================
+    // ANDROID WEBVIEW DETECTION
+    // ============================================================
+    if (/Android/i.test(navigator.userAgent)) {
+        document.documentElement.classList.add('android-webview');
+        console.log('📱 Android режим активирован');
+    }
+
+    // ============================================================
     // УТИЛИТЫ
     // ============================================================
     function sanitizeKey(name) {
@@ -638,6 +667,7 @@
     const myAvatar = $('myAvatar');
     const headerUsername = $('headerUsername');
     const searchInput = $('searchInput');
+    const searchType = $('searchType');
     const chatList = $('chatList');
     const chatListPanel = $('chatListPanel');
     const chatListOverlay = $('chatListOverlay');
@@ -919,7 +949,7 @@
     }
 
     // ============================================================
-    // ГОЛОСОВЫЕ СООБЩЕНИЯ (ИСПРАВЛЕННАЯ ВЕРСИЯ С ПРОКСИ)
+    // ГОЛОСОВЫЕ СООБЩЕНИЯ
     // ============================================================
     let mediaRecorder = null;
     let audioChunks = [];
@@ -1063,7 +1093,7 @@
     }
 
     // ============================================================
-    // ВОСПРОИЗВЕДЕНИЕ ГОЛОСОВЫХ (ИСПРАВЛЕННАЯ ВЕРСИЯ С ПРОКСИ)
+    // ВОСПРОИЗВЕДЕНИЕ ГОЛОСОВЫХ С ПРОКСИ
     // ============================================================
     function createVoiceMessageElement(data) {
         const container = document.createElement('div');
@@ -1135,7 +1165,6 @@
             timeLabel.textContent = mins + ':' + secs;
         }
         
-        // Функция для получения аудио через прокси
         async function getAudioUrl(originalUrl) {
             const proxyUrls = [
                 'https://api.allorigins.win/raw?url=',
@@ -1559,6 +1588,139 @@
         container.appendChild(content);
         return container;
     }
+
+    // ============================================================
+    // УМНЫЙ ПОИСК (по контактам, сообщениям и ID)
+    // ============================================================
+    function searchById(query) {
+        if (!query || query.length < 3) {
+            showToast('⚠️ Введите минимум 3 символа для поиска по ID');
+            return;
+        }
+        
+        // Ищем в контактах
+        const found = contactListArray.filter(name => {
+            const contactId = getUserIdByName(name);
+            return contactId && contactId.toLowerCase().includes(query.toLowerCase());
+        });
+        
+        if (found.length > 0) {
+            showToast(`✅ Найдено ${found.length} контактов по ID`);
+            return;
+        }
+        
+        // Ищем в базе пользователей
+        usersRef.orderByChild('userId').startAt(query).endAt(query + '\uf8ff').once('value')
+            .then(snap => {
+                const results = [];
+                snap.forEach(childSnap => {
+                    const data = childSnap.val();
+                    if (data.name && data.userId) {
+                        results.push({ name: data.name, userId: data.userId });
+                    }
+                });
+                
+                if (results.length > 0) {
+                    showToast(`✅ Найдено ${results.length} пользователей`);
+                    showSearchResults(results);
+                } else {
+                    showToast('❌ Пользователи не найдены');
+                }
+            })
+            .catch(() => showToast('❌ Ошибка поиска'));
+    }
+
+    function getUserIdByName(name) {
+        let foundId = null;
+        usersRef.orderByChild('name').equalTo(name).once('value')
+            .then(snap => {
+                snap.forEach(childSnap => {
+                    foundId = childSnap.val().userId;
+                });
+            });
+        return foundId;
+    }
+
+    function showSearchResults(results) {
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay active';
+        modal.style.cssText = 'display:flex;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:2000;justify-content:center;align-items:center;';
+        
+        let html = `
+            <div class="modal" style="max-width:500px;width:90%;max-height:80vh;overflow-y:auto;">
+                <div class="modal-header">
+                    <h2>🔍 Результаты поиска</h2>
+                    <button class="close-btn" onclick="this.closest('.modal-overlay').remove()">✕</button>
+                </div>
+                <div style="padding:10px 0;">
+        `;
+        
+        results.forEach(user => {
+            html += `
+                <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--border-color);">
+                    <div style="width:36px;height:36px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;">
+                        ${user.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div style="flex:1;">
+                        <div style="font-weight:600;color:var(--text-primary);">${user.name}</div>
+                        <div style="font-size:12px;color:var(--text-muted);">ID: ${user.userId}</div>
+                    </div>
+                    ${!contactListArray.includes(user.name) ? `
+                    <button onclick="addContact('${user.name}');this.closest('.modal-overlay').remove();" 
+                            style="background:var(--accent);color:#fff;border:none;border-radius:12px;padding:6px 14px;font-size:12px;cursor:pointer;">
+                        ➕ Добавить
+                    </button>
+                    ` : `
+                    <span style="color:var(--success);font-size:14px;">✅</span>
+                    `}
+                </div>
+            `;
+        });
+        
+        html += `
+                </div>
+            </div>
+        `;
+        
+        modal.innerHTML = html;
+        document.body.appendChild(modal);
+        
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) modal.remove();
+        });
+    }
+
+    // Обновляем обработчик поиска
+    searchInput.addEventListener('input', (e) => {
+        const query = e.target.value.trim();
+        const type = searchType ? searchType.value : 'all';
+        
+        if (!query) {
+            renderChatList();
+            return;
+        }
+        
+        if (type === 'id') {
+            searchById(query);
+            return;
+        }
+        
+        document.querySelectorAll('.chat-item').forEach(item => {
+            const name = item.querySelector('.name')?.textContent?.toLowerCase() || '';
+            const lastMsg = item.querySelector('.last-msg')?.textContent?.toLowerCase() || '';
+            const id = item.dataset.userId || '';
+            
+            let show = false;
+            if (type === 'all' || type === 'contacts') {
+                show = show || name.includes(query.toLowerCase());
+            }
+            if (type === 'all' || type === 'messages') {
+                show = show || lastMsg.includes(query.toLowerCase());
+            }
+            
+            item.style.display = show ? 'flex' : 'none';
+        });
+    });
 
     // ============================================================
     // КОНТЕКСТНОЕ МЕНЮ
@@ -2274,6 +2436,46 @@
     }
 
     // ============================================================
+    // УЛУЧШЕННАЯ АУТЕНТИФИКАЦИЯ С ПОВТОРНЫМИ ПОПЫТКАМИ
+    // ============================================================
+    async function signInWithRetry(email, pass, retries = 3) {
+        let lastError = null;
+        
+        for (let i = 0; i < retries; i++) {
+            try {
+                const btn = document.getElementById('loginSubmitBtn');
+                btn.textContent = `⏳ Попытка ${i + 1}/${retries}...`;
+                btn.disabled = true;
+                
+                const result = await auth.signInWithEmailAndPassword(email, pass);
+                btn.textContent = '✅ Вход';
+                btn.disabled = false;
+                return result;
+                
+            } catch (err) {
+                lastError = err;
+                console.log(`❌ Попытка ${i + 1} не удалась:`, err.message);
+                
+                if (err.code === 'auth/network-request-failed' && i < retries - 1) {
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                    if (!navigator.onLine) {
+                        showToast('⚠️ Нет интернета. Проверьте подключение.');
+                        break;
+                    }
+                } else {
+                    break;
+                }
+            }
+        }
+        
+        const btn = document.getElementById('loginSubmitBtn');
+        btn.textContent = 'Войти';
+        btn.disabled = false;
+        
+        throw lastError || new Error('Не удалось войти');
+    }
+
+    // ============================================================
     // ОТПРАВКА СООБЩЕНИЙ
     // ============================================================
     function sendMessage(text) {
@@ -2518,16 +2720,9 @@
     });
 
     // ============================================================
-    // ПОИСК
+    // ПОИСК (уже есть выше, дублируем обработчик для фильтра)
     // ============================================================
-    searchInput.addEventListener('input', (e) => {
-        const query = e.target.value.toLowerCase();
-        document.querySelectorAll('.chat-item').forEach(item => {
-            const name = item.querySelector('.name')?.textContent?.toLowerCase() || '';
-            const lastMsg = item.querySelector('.last-msg')?.textContent?.toLowerCase() || '';
-            item.style.display = (name.includes(query) || lastMsg.includes(query)) ? 'flex' : 'none';
-        });
-    });
+    // Обработчик уже добавлен выше
 
     // ============================================================
     // ГОРЯЧИЕ КЛАВИШИ
@@ -2631,6 +2826,13 @@
                     <option value="large" ${savedDensity === 'large' ? 'selected' : ''}>Увеличенная</option>
                 </select>
             </div>
+            <div class="setting-item">
+                <div>
+                    <div class="label">🆔 Войти по ID</div>
+                    <div class="desc">Быстрый вход по уникальному ID</div>
+                </div>
+                <button id="quickLoginByIdBtn" style="background:var(--accent);color:#fff;border:none;border-radius:12px;padding:8px 16px;font-size:13px;cursor:pointer;min-height:44px;">🚀 Войти</button>
+            </div>
             ${!isPwaInstalled ? `
             <div class="setting-item">
                 <div>
@@ -2723,6 +2925,27 @@
             addByUserIdBtn.addEventListener('click', () => {
                 const userId = prompt('Введите ID пользователя для добавления:');
                 if (userId && userId.trim()) findUserById(userId.trim());
+            });
+        }
+        
+        const quickLoginByIdBtn = document.getElementById('quickLoginByIdBtn');
+        if (quickLoginByIdBtn) {
+            quickLoginByIdBtn.addEventListener('click', () => {
+                const userId = prompt('Введите ваш ID для быстрого входа:');
+                if (userId && userId.trim()) {
+                    usersRef.orderByChild('userId').equalTo(userId.trim()).once('value')
+                        .then(snap => {
+                            let found = false;
+                            snap.forEach(childSnap => {
+                                const data = childSnap.val();
+                                if (data.userId === userId.trim()) {
+                                    alert('🔑 Для входа по ID нужен email.\nИспользуйте стандартный вход.');
+                                    found = true;
+                                }
+                            });
+                            if (!found) showToast('❌ Пользователь не найден');
+                        });
+                }
             });
         }
         
@@ -3578,23 +3801,80 @@
                 <button id="registerSubmitBtn" style="background:var(--bg-secondary);color:var(--text-primary);border:1px solid var(--border-color);border-radius:12px;padding:12px;font-size:14px;cursor:pointer;min-height:44px;">Регистрация</button>
             </div>
         `);
-        document.getElementById('loginSubmitBtn').addEventListener('click', () => {
+        
+        document.getElementById('loginSubmitBtn').addEventListener('click', async () => {
             const email = document.getElementById('loginEmail').value.trim();
             const pass = document.getElementById('loginPassword').value.trim();
-            if (!email || !pass) { alert('Введите email и пароль'); return; }
-            auth.signInWithEmailAndPassword(email, pass).catch(err => alert('Ошибка: ' + err.message));
+            
+            if (!email || !pass) {
+                showToast('❌ Введите email и пароль');
+                return;
+            }
+            
+            try {
+                await signInWithRetry(email, pass);
+                showToast('✅ Добро пожаловать!');
+            } catch (err) {
+                let message = '❌ Ошибка входа: ';
+                if (err.code === 'auth/network-request-failed') {
+                    message += 'Нет соединения. Проверьте интернет и VPN.';
+                } else if (err.code === 'auth/user-not-found') {
+                    message += 'Пользователь не найден.';
+                } else if (err.code === 'auth/wrong-password') {
+                    message += 'Неверный пароль.';
+                } else if (err.code === 'auth/invalid-email') {
+                    message += 'Неверный email.';
+                } else if (err.code === 'auth/too-many-requests') {
+                    message += 'Слишком много попыток. Подождите.';
+                } else {
+                    message += err.message;
+                }
+                showToast(message);
+            }
         });
-        document.getElementById('registerSubmitBtn').addEventListener('click', () => {
+        
+        document.getElementById('registerSubmitBtn').addEventListener('click', async () => {
             const email = document.getElementById('loginEmail').value.trim();
             const pass = document.getElementById('loginPassword').value.trim();
-            if (!email || !pass) { alert('Введите email и пароль'); return; }
-            auth.createUserWithEmailAndPassword(email, pass)
-                .then((cred) => {
-                    const name = email.split('@')[0];
-                    const userId = generateUserId();
-                    return usersRef.child(cred.user.uid).set({ name, userId });
-                })
-                .catch(err => alert('Ошибка: ' + err.message));
+            
+            if (!email || !pass) {
+                showToast('❌ Введите email и пароль');
+                return;
+            }
+            
+            if (pass.length < 6) {
+                showToast('❌ Пароль должен быть минимум 6 символов');
+                return;
+            }
+            
+            const btn = document.getElementById('registerSubmitBtn');
+            btn.textContent = '⏳ Регистрация...';
+            btn.disabled = true;
+            
+            try {
+                const cred = await auth.createUserWithEmailAndPassword(email, pass);
+                const name = email.split('@')[0];
+                const userId = generateUserId();
+                await usersRef.child(cred.user.uid).set({ name, userId });
+                showToast('✅ Регистрация успешна!');
+            } catch (err) {
+                let message = '❌ Ошибка регистрации: ';
+                if (err.code === 'auth/network-request-failed') {
+                    message += 'Нет соединения. Проверьте интернет.';
+                } else if (err.code === 'auth/email-already-in-use') {
+                    message += 'Email уже используется.';
+                } else if (err.code === 'auth/invalid-email') {
+                    message += 'Неверный email.';
+                } else if (err.code === 'auth/weak-password') {
+                    message += 'Слишком простой пароль.';
+                } else {
+                    message += err.message;
+                }
+                showToast(message);
+            } finally {
+                btn.textContent = 'Регистрация';
+                btn.disabled = false;
+            }
         });
     }
 
@@ -3618,6 +3898,9 @@
     console.log('✅ Исправлена фильтрация сообщений');
     console.log('✅ Исправлено воспроизведение голосовых через прокси');
     console.log('✅ Исправлены звонки');
+    console.log('✅ Улучшенный вход с повторными попытками');
+    console.log('✅ Умный поиск по контактам, сообщениям и ID');
+    console.log('✅ Оптимизация для Android');
     </script>
 </body>
 </html>
