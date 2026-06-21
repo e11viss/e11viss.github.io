@@ -3,15 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <!-- PWA Meta Tags -->
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💬</text></svg>">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="ICQ-чат">
+    <meta name="application-name" content="ICQ-чат">
+    <meta name="theme-color" content="#1a1a1e">
+    <meta name="msapplication-TileColor" content="#1a1a1e">
+    
+    <!-- PWA Icons -->
+    <link rel="icon" type="image/png" sizes="192x192" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230a84ff'/><text x='50' y='68' font-size='50' text-anchor='middle' fill='white'>💬</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='20' fill='%230a84ff'/><text x='50' y='68' font-size='50' text-anchor='middle' fill='white'>💬</text></svg>">
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    
     <title>ICQ-чат</title>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <style>
-        /* ===== RESET & BASE ===== */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         html, body {
             width: 100%; height: 100%;
@@ -23,7 +36,6 @@
         }
         body { display: flex; flex-direction: column; }
         
-        /* ===== THEME VARIABLES ===== */
         :root {
             --bg-primary: #1a1a1e;
             --bg-secondary: #2c2c30;
@@ -31,7 +43,6 @@
             --bg-input: #1c1c20;
             --bg-hover: #33333a;
             --bg-active: #3a3a44;
-            --bg-bubble-other: #2c2c30;
             --border-color: #3a3a40;
             --text-primary: #e5e5ea;
             --text-secondary: #8e8e93;
@@ -54,7 +65,6 @@
             --bg-input: #ffffff;
             --bg-hover: #e5e5ea;
             --bg-active: #d1d1d6;
-            --bg-bubble-other: #e5e5ea;
             --border-color: #c6c6c8;
             --text-primary: #1c1c1e;
             --text-secondary: #3a3a3c;
@@ -69,7 +79,6 @@
             --skeleton-bg: #e5e5ea;
         }
 
-        /* ===== APP LAYOUT ===== */
         .chat-app {
             display: flex;
             flex-direction: column;
@@ -81,7 +90,6 @@
             position: relative;
         }
 
-        /* ===== TOP BAR ===== */
         .top-bar {
             display: flex;
             align-items: center;
@@ -134,14 +142,12 @@
             .top-bar .shortcuts-hint { display: block; }
         }
 
-        /* ===== MAIN CONTENT ===== */
         .main-content {
             display: flex;
             flex: 1;
             overflow: hidden;
         }
 
-        /* ===== SIDEBAR ===== */
         .sidebar {
             width: 72px;
             background: var(--bg-panel);
@@ -203,7 +209,6 @@
             margin: 6px 0;
         }
 
-        /* ===== CHAT LIST ===== */
         .chat-list-panel {
             width: 320px;
             background: var(--bg-panel);
@@ -423,7 +428,6 @@
             padding: 0 5px;
         }
 
-        /* ===== CHAT PANEL ===== */
         .chat-panel {
             flex: 1;
             display: flex;
@@ -685,7 +689,6 @@
             50% { opacity: 1; }
         }
 
-        /* Link Preview */
         .link-preview {
             margin: 6px 0;
             border: 1px solid var(--border-color);
@@ -727,7 +730,6 @@
             margin-top: 4px;
         }
 
-        /* Voice Message */
         .voice-message {
             display: flex;
             align-items: center;
@@ -787,7 +789,6 @@
             color: var(--accent);
         }
 
-        /* Reactions */
         .reaction-popup {
             display: none;
             position: fixed;
@@ -857,7 +858,6 @@
             100% { transform: scale(1); }
         }
 
-        /* Smart Replies */
         .smart-replies {
             display: none;
             gap: 8px;
@@ -886,7 +886,6 @@
         }
         .smart-replies .reply-btn:active { transform: scale(0.95); }
 
-        /* Typing */
         .typing-indicator {
             padding: 4px 18px;
             font-size: 13px;
@@ -918,7 +917,6 @@
             30% { transform: translateY(-6px); opacity: 1; }
         }
 
-        /* Input */
         .input-area {
             padding: 8px 14px;
             background: var(--bg-panel);
@@ -1039,7 +1037,6 @@
         }
         .new-messages-btn:active { transform: scale(0.92); }
 
-        /* ===== BOTTOM TAB BAR ===== */
         .bottom-tab-bar {
             display: none;
             background: var(--tab-bg);
@@ -1086,7 +1083,6 @@
             padding: 0 4px;
         }
 
-        /* ===== CONTEXT MENU ===== */
         .context-menu-overlay {
             display: none;
             position: fixed;
@@ -1176,7 +1172,6 @@
             transform: scale(0.9);
         }
 
-        /* ===== MODAL ===== */
         .modal-overlay {
             display: none;
             position: fixed;
@@ -1241,10 +1236,6 @@
             font-size: 12px;
             color: var(--text-muted);
             margin-top: 2px;
-        }
-        .modal .setting-item .value {
-            color: var(--text-secondary);
-            font-size: 14px;
         }
         .modal .toggle-switch {
             position: relative;
@@ -1335,7 +1326,7 @@
             border-radius: 4px;
         }
 
-        /* ===== CALL ===== */
+        /* CALL */
         .call-overlay {
             display: none;
             position: fixed;
@@ -1349,6 +1340,7 @@
         }
         .call-overlay.active { display: flex; }
         .call-container {
+            position: relative;
             background: var(--bg-panel);
             border-radius: 24px;
             padding: 32px 40px;
@@ -1384,6 +1376,7 @@
             display: flex;
             gap: 16px;
             justify-content: center;
+            margin-top: 12px;
         }
         .call-container .call-actions button {
             width: 64px;
@@ -1403,12 +1396,20 @@
             color: var(--text-primary);
         }
         .call-container .call-actions .call-mute:hover { background: var(--bg-active); }
+        .call-container .call-actions .call-mute.muted {
+            background: var(--danger);
+            color: #fff;
+        }
         .call-container .call-actions .call-video {
             background: var(--bg-hover);
             color: var(--text-primary);
         }
         .call-container .call-actions .call-video:hover { background: var(--bg-active); }
-        .call-container video {
+        .call-container .call-actions .call-video.off {
+            background: var(--danger);
+            color: #fff;
+        }
+        .call-container .remote-video {
             width: 100%;
             max-height: 300px;
             border-radius: 12px;
@@ -1416,8 +1417,82 @@
             margin: 12px 0;
             object-fit: cover;
         }
+        .call-container .local-video {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            width: 120px;
+            height: 80px;
+            border-radius: 8px;
+            background: #000;
+            object-fit: cover;
+            border: 2px solid var(--border-color);
+            z-index: 10;
+        }
+        .call-container .call-timer {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--success);
+            margin: 8px 0;
+        }
 
-        /* ===== RESPONSIVE ===== */
+        /* PWA Install Banner */
+        .pwa-install-banner {
+            display: none;
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 16px 20px;
+            box-shadow: 0 8px 30px var(--shadow);
+            z-index: 500;
+            max-width: 400px;
+            width: 90%;
+            animation: slideUp 0.3s ease-out;
+            align-items: center;
+            gap: 12px;
+        }
+        .pwa-install-banner.active { display: flex; }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+        .pwa-install-banner .pwa-icon { font-size: 32px; flex-shrink: 0; }
+        .pwa-install-banner .pwa-text { flex: 1; }
+        .pwa-install-banner .pwa-text .title {
+            font-weight: 600;
+            color: var(--text-primary);
+            font-size: 14px;
+        }
+        .pwa-install-banner .pwa-text .desc {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+        .pwa-install-banner .pwa-btn {
+            background: var(--accent);
+            color: #fff;
+            border: none;
+            border-radius: 12px;
+            padding: 8px 16px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            white-space: nowrap;
+            min-height: 36px;
+        }
+        .pwa-install-banner .pwa-close {
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 4px 8px;
+        }
+        .pwa-install-banner .pwa-close:hover { color: var(--text-primary); }
+
         @media (max-width: 768px) {
             .sidebar { display: none; }
             .chat-list-panel {
@@ -1445,6 +1520,11 @@
             .bottom-tab-bar { display: flex; }
             .chat-panel .messages-area .message-row { max-width: 90%; }
             .top-bar .shortcuts-hint { display: none !important; }
+            .pwa-install-banner { bottom: 160px; }
+            .call-container .local-video {
+                width: 80px;
+                height: 60px;
+            }
         }
         @media (max-width: 400px) {
             .chat-list-panel { width: 100%; max-width: none; }
@@ -1459,16 +1539,13 @@
 <body>
 
 <div class="chat-app" id="app">
-    <!-- TOP BAR -->
     <div class="top-bar">
         <div class="profile-icon" id="myAvatar">Г</div>
         <div class="app-title">ICQ <span id="headerUsername">—</span></div>
         <span class="shortcuts-hint">⌘K — поиск · Esc — закрыть</span>
     </div>
 
-    <!-- MAIN CONTENT -->
     <div class="main-content">
-        <!-- SIDEBAR -->
         <div class="sidebar" id="sidebar">
             <button class="sidebar-btn active" data-tab="chats" title="Чаты">💬</button>
             <button class="sidebar-btn" data-tab="contacts" title="Контакты">👤</button>
@@ -1477,12 +1554,11 @@
             <button class="sidebar-btn" id="logoutSidebarBtn" title="Выйти" style="color:var(--danger);">🚪</button>
         </div>
 
-        <!-- CHAT LIST PANEL -->
         <div class="chat-list-panel-overlay" id="chatListOverlay"></div>
         <div class="chat-list-panel" id="chatListPanel">
             <div class="search-bar">
                 <span class="search-icon">🔍</span>
-                <input type="text" id="searchInput" placeholder="Поиск по контактам и сообщениям..." autocomplete="off">
+                <input type="text" id="searchInput" placeholder="Поиск по контактам и сообщениям...">
                 <button class="create-group-btn" id="createGroupBtn">👥 +</button>
             </div>
             <div class="folder-tabs" id="folderTabs">
@@ -1494,7 +1570,6 @@
             <div class="chat-list" id="chatList"></div>
         </div>
 
-        <!-- CHAT PANEL -->
         <div class="chat-panel" id="chatPanel">
             <div class="drop-zone" id="dropZone">
                 <span class="icon">📁</span>
@@ -1537,11 +1612,9 @@
                 <button class="send-btn" id="sendBtn" disabled>Отправить</button>
             </div>
             <input type="file" id="fileInput" accept="*/*">
-            <input type="file" id="voiceInput" accept="audio/*">
         </div>
     </div>
 
-    <!-- BOTTOM TAB BAR -->
     <div class="bottom-tab-bar" id="bottomTabBar">
         <button class="tab-btn active" data-tab="chats">
             💬
@@ -1584,6 +1657,17 @@
             <button class="call-end" id="callEndBtn">📴</button>
         </div>
     </div>
+</div>
+
+<!-- PWA INSTALL BANNER -->
+<div class="pwa-install-banner" id="pwaBanner">
+    <span class="pwa-icon">📱</span>
+    <div class="pwa-text">
+        <div class="title">Установить ICQ-чат</div>
+        <div class="desc">Добавьте приложение на рабочий стол</div>
+    </div>
+    <button class="pwa-btn" id="pwaInstallBtn">Установить</button>
+    <button class="pwa-close" id="pwaCloseBtn">✕</button>
 </div>
 
 <script>
@@ -1730,6 +1814,7 @@ const dropZone = $('dropZone');
 const folderTabs = $('folderTabs');
 const smartReplies = $('smartReplies');
 const createGroupBtn = $('createGroupBtn');
+const pwaBanner = $('pwaBanner');
 
 // ============================================================
 // ТЕМА
@@ -2040,9 +2125,6 @@ async function sendVoiceMessage(file) {
     }
 }
 
-// ============================================================
-// ВОСПРОИЗВЕДЕНИЕ ГОЛОСОВЫХ
-// ============================================================
 function createVoiceMessageElement(data) {
     const container = document.createElement('div');
     container.className = 'voice-message';
@@ -3594,6 +3676,408 @@ chatBackBtn.addEventListener('click', () => {
 chatListOverlay.addEventListener('click', closeChatList);
 
 // ============================================================
+// WEBRTC ЗВОНКИ
+// ============================================================
+let localStream = null;
+let remoteStream = null;
+let peerConnection = null;
+let currentCallId = null;
+let callTimerInterval = null;
+let callStartTime = null;
+
+const rtcConfiguration = {
+    iceServers: [
+        { urls: 'stun:stun.l.google.com:19302' },
+        { urls: 'stun:stun1.l.google.com:19302' },
+        { urls: 'stun:stun2.l.google.com:19302' },
+        { urls: 'stun:stun3.l.google.com:19302' },
+        { urls: 'stun:stun4.l.google.com:19302' },
+        { urls: 'stun:stun.ekiga.net' },
+        { urls: 'stun:stun.iptel.org' },
+        {
+            urls: 'turn:numb.viagenie.ca',
+            credential: 'muazkh',
+            username: 'webrtc@live.com'
+        }
+    ],
+    iceCandidatePoolSize: 10
+};
+
+function initCallListener() {
+    if (!currentUserId) return;
+    const callsRef = db.ref('calls/' + sanitizeKey(currentUserId));
+    callsRef.on('child_added', (snapshot) => {
+        const data = snapshot.val();
+        if (!data) return;
+        if (data.callerId === currentUserId) return;
+        if (data.status === 'ended' || data.status === 'declined') return;
+        showIncomingCall(data, snapshot.key);
+    });
+}
+
+function startCall(contactName, video = false) {
+    if (!currentUser) { showToast('❌ Войдите в систему'); return; }
+    if (!currentUserId) { showToast('❌ Ошибка идентификации'); return; }
+    
+    usersRef.orderByChild('name').equalTo(contactName).once('value').then(snap => {
+        let targetUserId = null;
+        let targetName = null;
+        snap.forEach(childSnap => {
+            targetUserId = childSnap.key;
+            targetName = childSnap.val().name;
+        });
+        if (!targetUserId) { showToast('❌ Пользователь не найден'); return; }
+        if (targetUserId === currentUser.uid) { showToast('❌ Нельзя позвонить самому себе'); return; }
+        
+        db.ref('calls/' + sanitizeKey(targetUserId)).once('value').then(snap => {
+            const data = snap.val() || {};
+            const activeCall = Object.values(data).find(c => 
+                c.status === 'calling' || c.status === 'answered' || c.status === 'connected'
+            );
+            if (activeCall) { showToast('❌ Пользователь уже в звонке'); return; }
+            initiateCall(targetUserId, targetName, video);
+        });
+    }).catch(err => showToast('❌ Ошибка: ' + err.message));
+}
+
+function initiateCall(targetUserId, targetName, video) {
+    currentCallId = 'call_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6);
+    peerConnection = new RTCPeerConnection(rtcConfiguration);
+    
+    navigator.mediaDevices.getUserMedia({ audio: true, video: video })
+        .then(stream => {
+            localStream = stream;
+            stream.getTracks().forEach(track => {
+                peerConnection.addTrack(track, stream);
+            });
+            showCallUI(targetName, 'Звонок...', video);
+            
+            peerConnection.onicecandidate = (event) => {
+                if (event.candidate) {
+                    db.ref('calls/' + sanitizeKey(targetUserId) + '/' + currentCallId + '/candidates').push({
+                        candidate: event.candidate.candidate,
+                        sdpMid: event.candidate.sdpMid,
+                        sdpMLineIndex: event.candidate.sdpMLineIndex
+                    });
+                }
+            };
+            
+            peerConnection.ontrack = (event) => {
+                remoteStream = event.streams[0];
+                showRemoteVideo(remoteStream);
+                document.getElementById('callStatus').textContent = 'В разговоре';
+                startCallTimer();
+            };
+            
+            peerConnection.createOffer()
+                .then(offer => peerConnection.setLocalDescription(offer))
+                .then(() => {
+                    const callData = {
+                        caller: currentName,
+                        callerId: currentUserId,
+                        target: targetName,
+                        targetId: targetUserId,
+                        video: video,
+                        status: 'calling',
+                        offer: {
+                            sdp: peerConnection.localDescription.sdp,
+                            type: peerConnection.localDescription.type
+                        },
+                        timestamp: firebase.database.ServerValue.TIMESTAMP
+                    };
+                    db.ref('calls/' + sanitizeKey(targetUserId) + '/' + currentCallId).set(callData);
+                    
+                    const callRef = db.ref('calls/' + sanitizeKey(targetUserId) + '/' + currentCallId);
+                    callRef.on('value', (snap) => {
+                        const data = snap.val();
+                        if (!data) return;
+                        if (data.status === 'answered' && data.answer) {
+                            const answer = new RTCSessionDescription({
+                                sdp: data.answer.sdp,
+                                type: data.answer.type
+                            });
+                            peerConnection.setRemoteDescription(answer);
+                            document.getElementById('callStatus').textContent = 'Соединение...';
+                        } else if (data.status === 'declined') {
+                            endCall();
+                            showToast('📞 Звонок отклонён');
+                        } else if (data.status === 'ended') {
+                            endCall();
+                        }
+                    });
+                    
+                    const candidatesRef = db.ref('calls/' + sanitizeKey(targetUserId) + '/' + currentCallId + '/candidates');
+                    candidatesRef.on('child_added', (snap) => {
+                        const data = snap.val();
+                        if (data && peerConnection) {
+                            const candidate = new RTCIceCandidate({
+                                candidate: data.candidate,
+                                sdpMid: data.sdpMid,
+                                sdpMLineIndex: data.sdpMLineIndex
+                            });
+                            peerConnection.addIceCandidate(candidate).catch(() => {});
+                        }
+                    });
+                });
+        })
+        .catch(err => {
+            showToast('❌ Нет доступа к микрофону/камере: ' + err.message);
+            hideCallUI();
+        });
+}
+
+function showIncomingCall(data, callKey) {
+    const caller = data.caller || 'Неизвестный';
+    const isVideo = data.video || false;
+    window._incomingCallKey = callKey;
+    window._incomingCallData = data;
+    
+    showModal(`
+        <div style="text-align:center;">
+            <div style="font-size:48px;margin:16px 0;">${isVideo ? '📹' : '📞'}</div>
+            <div style="font-size:20px;font-weight:600;color:var(--text-primary);">${caller}</div>
+            <div style="color:var(--text-secondary);margin:4px 0 20px;">Входящий звонок...</div>
+            <div style="display:flex;gap:16px;justify-content:center;">
+                <button onclick="answerCall()" style="width:64px;height:64px;border-radius:50%;border:none;background:var(--success);color:#fff;font-size:28px;cursor:pointer;">📞</button>
+                <button onclick="declineCall()" style="width:64px;height:64px;border-radius:50%;border:none;background:var(--danger);color:#fff;font-size:28px;cursor:pointer;">✕</button>
+            </div>
+        </div>
+    `);
+}
+
+function answerCall() {
+    closeModal();
+    const callKey = window._incomingCallKey;
+    const data = window._incomingCallData;
+    if (!data || !callKey) return;
+    
+    currentCallId = callKey;
+    const isVideo = data.video || false;
+    const caller = data.caller || 'Собеседник';
+    peerConnection = new RTCPeerConnection(rtcConfiguration);
+    
+    navigator.mediaDevices.getUserMedia({ audio: true, video: isVideo })
+        .then(stream => {
+            localStream = stream;
+            stream.getTracks().forEach(track => {
+                peerConnection.addTrack(track, stream);
+            });
+            showCallUI(caller, 'Соединение...', isVideo);
+            
+            peerConnection.onicecandidate = (event) => {
+                if (event.candidate) {
+                    db.ref('calls/' + sanitizeKey(currentUserId) + '/' + callKey + '/candidates').push({
+                        candidate: event.candidate.candidate,
+                        sdpMid: event.candidate.sdpMid,
+                        sdpMLineIndex: event.candidate.sdpMLineIndex
+                    });
+                }
+            };
+            
+            peerConnection.ontrack = (event) => {
+                remoteStream = event.streams[0];
+                showRemoteVideo(remoteStream);
+                document.getElementById('callStatus').textContent = 'В разговоре';
+                startCallTimer();
+            };
+            
+            const offer = new RTCSessionDescription({
+                sdp: data.offer.sdp,
+                type: data.offer.type
+            });
+            
+            peerConnection.setRemoteDescription(offer)
+                .then(() => peerConnection.createAnswer())
+                .then(answer => peerConnection.setLocalDescription(answer))
+                .then(() => {
+                    db.ref('calls/' + sanitizeKey(currentUserId) + '/' + callKey).update({
+                        status: 'answered',
+                        answer: {
+                            sdp: peerConnection.localDescription.sdp,
+                            type: peerConnection.localDescription.type
+                        }
+                    });
+                });
+            
+            const candidatesRef = db.ref('calls/' + sanitizeKey(currentUserId) + '/' + callKey + '/candidates');
+            candidatesRef.on('child_added', (snap) => {
+                const data = snap.val();
+                if (data && peerConnection) {
+                    const candidate = new RTCIceCandidate({
+                        candidate: data.candidate,
+                        sdpMid: data.sdpMid,
+                        sdpMLineIndex: data.sdpMLineIndex
+                    });
+                    peerConnection.addIceCandidate(candidate).catch(() => {});
+                }
+            });
+        })
+        .catch(err => {
+            showToast('❌ Нет доступа к микрофону/камере: ' + err.message);
+            hideCallUI();
+        });
+}
+
+function declineCall() {
+    closeModal();
+    const callKey = window._incomingCallKey;
+    if (callKey && currentUserId) {
+        db.ref('calls/' + sanitizeKey(currentUserId) + '/' + callKey).update({ status: 'declined' });
+        setTimeout(() => {
+            db.ref('calls/' + sanitizeKey(currentUserId) + '/' + callKey).remove();
+        }, 3000);
+    }
+    showToast('📞 Звонок отклонён');
+}
+
+function endCall() {
+    if (peerConnection) { peerConnection.close(); peerConnection = null; }
+    if (localStream) { localStream.getTracks().forEach(t => t.stop()); localStream = null; }
+    if (remoteStream) { remoteStream.getTracks().forEach(t => t.stop()); remoteStream = null; }
+    stopCallTimer();
+    if (currentCallId && currentUserId) {
+        db.ref('calls/' + sanitizeKey(currentUserId) + '/' + currentCallId).update({ status: 'ended' });
+        setTimeout(() => {
+            db.ref('calls/' + sanitizeKey(currentUserId) + '/' + currentCallId).remove();
+        }, 3000);
+    }
+    hideCallUI();
+    showToast('📞 Звонок завершён');
+}
+
+function showCallUI(contactName, status, video = false) {
+    const overlay = document.getElementById('callOverlay');
+    document.getElementById('callName').textContent = contactName;
+    document.getElementById('callStatus').textContent = status;
+    document.getElementById('callAvatar').textContent = video ? '📹' : '📞';
+    const container = document.getElementById('callVideoContainer');
+    container.innerHTML = '';
+    if (video && localStream) {
+        const localVideo = document.createElement('video');
+        localVideo.className = 'local-video';
+        localVideo.autoplay = true;
+        localVideo.muted = true;
+        localVideo.srcObject = localStream;
+        container.appendChild(localVideo);
+    }
+    overlay.classList.add('active');
+}
+
+function showRemoteVideo(stream) {
+    const container = document.getElementById('callVideoContainer');
+    const existing = container.querySelector('.remote-video');
+    if (existing) existing.remove();
+    const video = document.createElement('video');
+    video.className = 'remote-video';
+    video.autoplay = true;
+    video.srcObject = stream;
+    container.prepend(video);
+}
+
+function hideCallUI() {
+    document.getElementById('callOverlay').classList.remove('active');
+    document.getElementById('callVideoContainer').innerHTML = '';
+}
+
+function startCallTimer() {
+    callStartTime = Date.now();
+    if (callTimerInterval) clearInterval(callTimerInterval);
+    callTimerInterval = setInterval(() => {
+        const elapsed = Math.floor((Date.now() - callStartTime) / 1000);
+        const mins = String(Math.floor(elapsed / 60)).padStart(2, '0');
+        const secs = String(elapsed % 60).padStart(2, '0');
+        const timerEl = document.getElementById('callStatus');
+        if (timerEl) timerEl.textContent = '⏱ ' + mins + ':' + secs;
+    }, 1000);
+}
+
+function stopCallTimer() {
+    if (callTimerInterval) { clearInterval(callTimerInterval); callTimerInterval = null; }
+    callStartTime = null;
+}
+
+voiceCallBtn.addEventListener('click', () => {
+    if (currentContact === 'all' || currentContact.startsWith('group_')) {
+        showToast('📞 Звонок доступен только для личных чатов');
+        return;
+    }
+    startCall(currentContact, false);
+});
+
+videoCallBtn.addEventListener('click', () => {
+    if (currentContact === 'all' || currentContact.startsWith('group_')) {
+        showToast('📹 Видеозвонок доступен только для личных чатов');
+        return;
+    }
+    startCall(currentContact, true);
+});
+
+document.getElementById('callEndBtn').addEventListener('click', endCall);
+
+document.getElementById('callMuteBtn').addEventListener('click', function() {
+    if (localStream) {
+        const audioTracks = localStream.getAudioTracks();
+        audioTracks.forEach(track => {
+            track.enabled = !track.enabled;
+        });
+        this.classList.toggle('muted');
+        this.textContent = audioTracks[0]?.enabled ? '🔊' : '🔇';
+    }
+});
+
+document.getElementById('callVideoBtn').addEventListener('click', function() {
+    if (localStream) {
+        const videoTracks = localStream.getVideoTracks();
+        videoTracks.forEach(track => {
+            track.enabled = !track.enabled;
+        });
+        this.classList.toggle('off');
+        this.textContent = videoTracks[0]?.enabled ? '📹' : '🚫';
+    }
+});
+
+// ============================================================
+// PWA INSTALL
+// ============================================================
+let deferredPrompt = null;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    pwaBanner.classList.add('active');
+});
+
+document.getElementById('pwaInstallBtn')?.addEventListener('click', async () => {
+    if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const result = await deferredPrompt.userChoice;
+        if (result.outcome === 'accepted') {
+            console.log('✅ PWA установлено');
+            pwaBanner.classList.remove('active');
+        }
+        deferredPrompt = null;
+    }
+});
+
+document.getElementById('pwaCloseBtn')?.addEventListener('click', () => {
+    pwaBanner.classList.remove('active');
+});
+
+window.addEventListener('appinstalled', () => {
+    console.log('✅ Приложение установлено!');
+    pwaBanner.classList.remove('active');
+});
+
+// ============================================================
+// SERVICE WORKER
+// ============================================================
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js')
+        .then(() => console.log('✅ Service Worker зарегистрирован'))
+        .catch(() => console.log('⚠️ Service Worker не зарегистрирован'));
+}
+
+// ============================================================
 // АУТЕНТИФИКАЦИЯ
 // ============================================================
 auth.onAuthStateChanged(user => {
@@ -3636,6 +4120,7 @@ auth.onAuthStateChanged(user => {
             if ("Notification" in window && Notification.permission === "default") {
                 Notification.requestPermission();
             }
+            initCallListener();
         });
     } else {
         if (onlineInterval) { clearInterval(onlineInterval); onlineInterval = null; }
@@ -3706,9 +4191,10 @@ createGroupBtn.addEventListener('click', createGroup);
 // ============================================================
 // ЗАПУСК
 // ============================================================
-console.log('🚀 ICQ-чат v5.0 запущен!');
+console.log('🚀 ICQ-чат v6.0 запущен!');
 console.log('✅ Все функции интегрированы');
-console.log('✅ Звонки через Firebase (без PeerJS)');
+console.log('✅ Аудио/видео звонки через WebRTC + Firebase');
+console.log('✅ PWA поддержка (установка на рабочий стол)');
 </script>
 </body>
 </html>
