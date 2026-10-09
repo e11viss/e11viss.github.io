@@ -1,5 +1,5 @@
 // sw.js - Service Worker для PWA
-const CACHE_NAME = 'icq-chat-v6';
+const CACHE_NAME = 'icq-chat-v7';
 const urlsToCache = ['/', '/index.html', '/manifest.json'];
 
 self.addEventListener('install', (event) => {
